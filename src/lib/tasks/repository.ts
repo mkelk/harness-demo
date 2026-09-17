@@ -37,6 +37,15 @@ const OPEN_ORDER =
   "ORDER BY (due_on IS NULL) ASC, due_on ASC, priority ASC, created_at DESC, id DESC";
 const DONE_ORDER = "ORDER BY done_at DESC, id DESC";
 
+/**
+ * Escapes `\`, `%` and `_` so a `q` search term matches only literal
+ * characters, never SQL LIKE wildcards. Order matters: backslashes are
+ * escaped first, so the backslashes this adds are not themselves re-escaped.
+ */
+function escapeLike(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
+}
+
 function selectTasks(
   db: DatabaseSync,
   doneClause: string,
@@ -44,12 +53,14 @@ function selectTasks(
   q: string,
 ): Task[] {
   const search =
-    q.length > 0 ? " AND lower(title) LIKE '%' || lower(?) || '%'" : "";
+    q.length > 0
+      ? " AND lower(title) LIKE '%' || lower(?) || '%' ESCAPE '\\'"
+      : "";
   const statement = db.prepare(
     `SELECT * FROM tasks WHERE ${doneClause}${search} ${order}`,
   );
   const rows = (q.length > 0
-    ? statement.all(q)
+    ? statement.all(escapeLike(q))
     : statement.all()) as unknown as TaskRow[];
   return rows.map(toTask);
 }

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 // One ordered flow on its own rows ("Sched: ..."). It never assumes an empty
-// database, and it deletes its row at the end: spec files run alphabetically,
+// database, and an afterAll deletes its row: spec files run alphabetically,
 // so this file runs before tasks.spec.ts, whose first test expects the fresh
 // per-run database to be empty.
 test.describe.configure({ mode: "serial" });
@@ -11,6 +11,18 @@ const openList = (page: import("@playwright/test").Page) =>
   page.getByRole("list", { name: "Open tasks" });
 const filters = (page: import("@playwright/test").Page) =>
   page.getByRole("navigation", { name: "Filters" });
+
+// Cleanup runs here, not as a test, so it still deletes the row when an
+// earlier test in this serial file fails partway through.
+test.afterAll(async ({ browser }) => {
+  const page = await browser.newPage();
+  await page.goto("/");
+  const deleteButton = page.getByRole("button", { name: `Delete: ${TITLE}` });
+  if ((await deleteButton.count()) > 0) {
+    await deleteButton.click();
+  }
+  await page.close();
+});
 
 test("adds a High task due 2000-01-01 and shows it first with High and Overdue", async ({
   page,
@@ -102,10 +114,4 @@ test("the All filter shows both sections", async ({ page }) => {
     page.getByRole("heading", { name: /^Done \(\d+\)$/ }),
   ).toBeVisible();
   await expect(openList(page).getByText(TITLE, { exact: true })).toBeVisible();
-});
-
-test("removes its own row", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: `Delete: ${TITLE}` }).click();
-  await expect(page.getByText(TITLE, { exact: true })).toHaveCount(0);
 });

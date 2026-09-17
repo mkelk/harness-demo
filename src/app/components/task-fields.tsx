@@ -1,19 +1,8 @@
-import { PRIORITY_LABELS } from "@/lib/tasks/validate";
-
-/** The four fields as strings, the way a form submits them. */
-export type TaskFieldValues = {
-  title: string;
-  notes: string;
-  dueOn: string;
-  priority: string;
-};
-
-export type TaskFieldErrors = {
-  title?: string;
-  notes?: string;
-  dueOn?: string;
-  priority?: string;
-};
+import {
+  PRIORITY_LABELS,
+  type SubmittedValues,
+  type TaskInputErrors,
+} from "@/lib/tasks/validate";
 
 const PRIORITY_OPTIONS: ReadonlyArray<[string, string]> = [
   ["1", PRIORITY_LABELS[1]],
@@ -43,8 +32,8 @@ export function TaskFields({
   errors,
 }: {
   idPrefix: string;
-  values: TaskFieldValues;
-  errors: TaskFieldErrors | undefined;
+  values: SubmittedValues;
+  errors: TaskInputErrors | undefined;
 }) {
   return (
     <>

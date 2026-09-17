@@ -134,6 +134,12 @@ describe("TaskList sections", () => {
     ).toBeInTheDocument();
   });
 
+  it("show=open with no rows renders Open (0), never the empty state", () => {
+    render(<TaskList open={[]} done={[]} show="open" q="" today={TODAY} />);
+    expect(heading(/^Open \(0\)/)).toBeInTheDocument();
+    expect(screen.queryByText(/No tasks yet/)).toBeNull();
+  });
+
   it("with a search and no match renders Open (0) with no rows", () => {
     render(<TaskList open={[]} done={[]} show="open" q="zzqx" today={TODAY} />);
     expect(screen.queryByText(/No tasks yet/)).toBeNull();

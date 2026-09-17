@@ -88,6 +88,20 @@ describe("listTasks", () => {
     expect(result.done.map((t) => t.title)).toEqual(["Oat milk"]);
     expect(listTasks(d, { q: "   " }).open).toHaveLength(2);
   });
+
+  it("treats %, _ and \\ in q as literal characters, not LIKE wildcards", () => {
+    const d = db();
+    createTask(d, { ...base, title: "100% done" });
+    createTask(d, { ...base, title: "100 done" });
+    createTask(d, { ...base, title: "a_b" });
+    createTask(d, { ...base, title: "axb" });
+    expect(listTasks(d, { q: "100%" }).open.map((t) => t.title)).toEqual([
+      "100% done",
+    ]);
+    expect(listTasks(d, { q: "a_b" }).open.map((t) => t.title)).toEqual([
+      "a_b",
+    ]);
+  });
 });
 
 describe("isOverdue", () => {
@@ -142,13 +156,20 @@ describe("createTask", () => {
     expect(getTask(d, task.id)).toEqual(task);
   });
 
-  it("orders undated open tasks of equal priority newest first", () => {
+  it("orders undated open tasks of equal priority by created_at, not id", () => {
     const d = db();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-01T00:00:01.000Z"));
     createTask(d, { ...base, title: "First" });
+    vi.setSystemTime(new Date("2024-01-01T00:00:03.000Z"));
     createTask(d, { ...base, title: "Second" });
+    // Set the clock backwards so the third (highest id) insert gets an
+    // older created_at than the second: id DESC alone would put it first,
+    // but created_at DESC must win.
+    vi.setSystemTime(new Date("2024-01-01T00:00:02.000Z"));
     createTask(d, { ...base, title: "Third" });
     const { open } = listTasks(d);
-    expect(open.map((t) => t.id)).toEqual([3, 2, 1]);
+    expect(open.map((t) => t.id)).toEqual([2, 3, 1]);
   });
 
   it("throws when the title is 201 characters (CHECK constraint)", () => {

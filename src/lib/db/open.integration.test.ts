@@ -74,12 +74,19 @@ describe("applyMigrations", () => {
     // createTestDb applies MIGRATIONS; start again from a db with only 0001.
     db.exec("DROP TABLE tasks; DROP TABLE schema_migrations");
     expect(applyMigrations(db, [migration0001])).toBe(1);
+    db.prepare(
+      "INSERT INTO tasks (title, notes, done_at, created_at, updated_at) VALUES (?, '', NULL, ?, ?)",
+    ).run("Buy milk", "2024-01-01T00:00:00.000Z", "2024-01-01T00:00:00.000Z");
     expect(applyMigrations(db, MIGRATIONS)).toBe(1);
     const rows = db
       .prepare("SELECT version FROM schema_migrations ORDER BY version")
       .all()
       .map((row) => (row as { version: number }).version);
     expect(rows).toEqual([1, 2]);
+    const task = db
+      .prepare("SELECT priority, due_on FROM tasks WHERE title = ?")
+      .get("Buy milk") as { priority: number; due_on: string | null };
+    expect(task).toEqual({ priority: 2, due_on: null });
     close();
   });
 
