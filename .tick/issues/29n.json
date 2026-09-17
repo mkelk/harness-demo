@@ -3,7 +3,7 @@
   "title": "Repairs from final review of Persistence foundation",
   "description": "Repairs routed from the epic's final review (tick me4). Apply exactly these; nothing else.\n1. src/lib/db/index.ts: add `export type { DatabaseSync } from \"node:sqlite\";`. src/lib/tasks/repository.ts: replace `type DatabaseSync = TestDb[\"db\"]` with `import type { DatabaseSync } from \"@/lib/db\";` (drop the TestDb import if now unused). scripts/check-rules.test.ts must still pass (the barrel is inside src/lib/db/).\n2. src/lib/tasks/repository.integration.test.ts: make the done-ordering test discriminate `ORDER BY done_at DESC, id DESC` from `ORDER BY id DESC`: create tasks 1 and 2, mark task 2 done first, then task 1 done with a later timestamp (use `vi.useFakeTimers()` + `vi.setSystemTime()` and advance between the two setDone calls; restore real timers in afterEach), and expect done ids `[1, 2]`. Also make the updateTask test prove the bump: advance the fake clock between createTask and updateTask and assert `updatedAt \u003e createdAt` strictly (string comparison of ISO timestamps is fine).\n3. src/lib/db/migrate.ts: guard the rollback: `if (db.isTransaction) db.exec(\"ROLLBACK\");` (node:sqlite on Node 26 exposes `isTransaction`). Change the rollback test in src/lib/db/open.integration.test.ts to use a migration whose sql is `\"CREATE TABLE y(a); CREATE TABLE (\"` and assert afterwards that table `y` does not exist and schema_migrations has no row for it. Remove the duplicate 201-character CHECK test from open.integration.test.ts (it lives in the repository test).\n4. docs/current/testing.md: fix the \"Writing a test\" bullet to name real files: `src/lib/tasks/validate.test.ts` beside `src/lib/tasks/validate.ts`. docs/current/how/persistence.md: the \"Public surface of the persistence layer\" row of Key entry points also lists `Migration`, `TestDb` and `DatabaseSync`.\n5. eslint.config.mjs: add \"coverage/**\" to the ignores so `pnpm lint` does not warn after `pnpm test:coverage`.\nRun: pnpm typecheck \u0026\u0026 pnpm lint \u0026\u0026 pnpm test \u0026\u0026 pnpm docs:check",
   "notes": "2026-09-17 15:10 - runner-state: runner=claude branch=tick/azj/29n worktree=../.ticks-worktrees/29n base=27e2a993f0de97012e7dba94cb56eb782cd53ea9 mode=solo-tick tier=balanced (repairs from review me4)",
-  "status": "open",
+  "status": "closed",
   "priority": 2,
   "type": "task",
   "owner": "morten@elk.dk",
@@ -11,5 +11,7 @@
   "acceptance_criteria": "pnpm typecheck, pnpm lint (no warnings), pnpm test and pnpm docs:check pass; repository.ts imports DatabaseSync from @/lib/db; the done-ordering test expects [1, 2] with task 1 done later; the updateTask test asserts a strictly greater updatedAt; migrate.ts guards ROLLBACK with db.isTransaction; the rollback test proves table y is absent; testing.md names validate.test.ts.",
   "created_by": "morten@elk.dk",
   "created_at": "2026-09-17T13:10:35.145302141Z",
-  "updated_at": "2026-09-17T13:10:36.146509807Z"
+  "updated_at": "2026-09-17T13:14:57.639614341Z",
+  "closed_at": "2026-09-17T13:14:57.639614341Z",
+  "closed_reason": "Completed: DatabaseSync exported from db barrel, discriminating ordering/updatedAt tests with fake timers, guarded ROLLBACK, doc fixes, coverage ignored by eslint"
 }

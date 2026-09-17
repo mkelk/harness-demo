@@ -2,7 +2,7 @@
   "id": "me4",
   "title": "Final review of Persistence foundation diff",
   "description": "Review the epic's full diff from base branch 2026-09-17-increment-01 against the epic description, its acceptance and the spec (docs/thoughts/2026-09-17-increment-01-task-basics.md). Axes: spec compliance, correctness (sqlite transactions, timestamp ordering), test quality, type/contract design (Task, repository signatures), comment and doc accuracy. Findings with severity and confidence; blockers become repair ticks.",
-  "status": "open",
+  "status": "closed",
   "priority": 2,
   "type": "task",
   "owner": "morten@elk.dk",
@@ -15,5 +15,7 @@
   "role": "review",
   "created_by": "morten@elk.dk",
   "created_at": "2026-09-17T12:57:07.640882404Z",
-  "updated_at": "2026-09-17T13:10:48.021520553Z"
+  "updated_at": "2026-09-17T13:14:57.651787268Z",
+  "closed_at": "2026-09-17T13:14:57.651787268Z",
+  "closed_reason": "Completed: frontier review, 0 blockers, 4 should-fix + 5 nits repaired in 29n; remaining nits accepted (notes CHECK kept, extra validate exports kept, client.ts dual slot)"
 }
