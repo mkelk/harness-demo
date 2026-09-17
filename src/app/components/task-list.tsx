@@ -75,7 +75,9 @@ function TaskMarks({ task, today }: { task: Task; today: string }) {
  * `"open"` renders Open only, `"done"` Done only, `"all"` both (a `Done (0)`
  * heading included); `undefined` (no query) renders Open and, only when it has
  * rows, Done, which is what the page did before the filter bar existed. The
- * empty-state paragraph appears only without a search and without rows.
+ * empty-state paragraph appears only when `show` is `undefined` or `"all"`,
+ * without a search and without rows; `"open"` and `"done"` always render
+ * their heading with a count, `Open (0)` or `Done (0)` included.
  */
 export function TaskList({
   open,
@@ -95,7 +97,12 @@ export function TaskList({
     show === "done" ||
     show === "all" ||
     (show === undefined && done.length > 0);
-  if (showOpen && open.length === 0 && done.length === 0 && q.length === 0) {
+  const showEmptyState =
+    (show === undefined || show === "all") &&
+    open.length === 0 &&
+    done.length === 0 &&
+    q.length === 0;
+  if (showEmptyState) {
     return (
       <p className="mt-6 text-zinc-600">
         No tasks yet. Add the first one above.

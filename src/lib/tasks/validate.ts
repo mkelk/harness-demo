@@ -143,3 +143,9 @@ export function submittedValues(formData: FormData): {
     priority: toStringOrEmpty(raw.priority),
   };
 }
+
+/**
+ * The four fields as strings, the way a form submits them. The single source
+ * for this shape, so a new field is added in one place.
+ */
+export type SubmittedValues = ReturnType<typeof submittedValues>;

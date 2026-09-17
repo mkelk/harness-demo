@@ -58,12 +58,19 @@ the badge text.
 
 `src/app/page.tsx` awaits `searchParams` (a Promise in Next.js 16) and reads:
 
-| Parameter | Values                | Missing or other value                                                                 | Effect                                     |
-| --------- | --------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `show`    | `open`, `done`, `all` | `undefined`: the default view, which reads both lists (`listTasks` gets `show: "all"`) | which sections render, see the table below |
-| `q`       | any text, trimmed     | `""`: no search                                                                        | `lower(title) LIKE '%'                     |     | lower(?) |     | '%'` on both lists; counts follow |
+| Parameter | Values                | Missing or other value                                                                 | Effect                                                 |
+| --------- | --------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `show`    | `open`, `done`, `all` | `undefined`: the default view, which reads both lists (`listTasks` gets `show: "all"`) | which sections render, see the table below             |
+| `q`       | any text, trimmed     | `""`: no search                                                                        | case-insensitive substring on the title; counts follow |
 
 A repeated parameter (`?show=a&show=b`) uses its first value.
+
+The SQL for `q` is `lower(title) LIKE '%' || lower(?) || '%' ESCAPE '\'` on both lists.
+`\`, `%` and `_` in the search text are escaped (`\` first, so the escaping backslashes
+are not themselves re-escaped) before being bound, so a search for `100%` or `a_b`
+matches those characters literally instead of as LIKE wildcards. Matching is a
+case-insensitive substring on the title. SQLite's `lower()` folds ASCII case only, so
+`mælk` does not match `MÆLK`.
 
 The default view is deliberately not `show=open`. `e2e/tasks.spec.ts` (and the page
 before the filter bar existed) expects `/` with no query to show the Open section and,
@@ -72,15 +79,17 @@ missing `show` renders like `all`, with one difference: an empty Done section is
 The `Open` link always carries `show=open` explicitly, and the `All` link is the current
 one on the default view.
 
-| `show`      | Open section | Done section               | Empty state paragraph                     |
-| ----------- | ------------ | -------------------------- | ----------------------------------------- |
-| `undefined` | yes          | only when it has rows      | when both lists are empty and `q` is `""` |
-| `open`      | yes          | no                         | when both lists are empty and `q` is `""` |
-| `done`      | no           | yes, `Done (0)` when empty | never                                     |
-| `all`       | yes          | yes, `Done (0)` when empty | when both lists are empty and `q` is `""` |
+| `show`      | Open section | Done section               | Empty state paragraph                         |
+| ----------- | ------------ | -------------------------- | --------------------------------------------- |
+| `undefined` | yes          | only when it has rows      | when both lists are empty and `q` is `""`     |
+| `open`      | yes          | no                         | never; `Open (0)` heading when it has no rows |
+| `done`      | no           | yes, `Done (0)` when empty | never                                         |
+| `all`       | yes          | yes, `Done (0)` when empty | when both lists are empty and `q` is `""`     |
 
 With `q` set and no match the headings render with their counts (`Open (0)`) above an
-empty list; the empty state paragraph never shows during a search.
+empty list; the empty state paragraph never shows during a search. It only ever replaces
+the sections on `show=undefined` or `show=all`; `open` and `done` always render their
+heading with a count, even at zero.
 
 ## The filter bar
 
