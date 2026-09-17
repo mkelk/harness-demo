@@ -10,8 +10,9 @@ in the repository README, not here; this folder describes the app as it is now.
 A single-user task manager: a Next.js 16 app (App Router, React server components and
 server actions) persisting to one SQLite file through Node's built-in `node:sqlite`. No
 external services. It runs with `pnpm dev` on port 3000 and stores data in `data/dev.db`.
-On `/` you add a task (title, optional notes), see the open list newest first, mark a
-task done, reopen it, and delete it; `/tasks/<id>/edit` changes its title and notes;
+On `/` you add a task (title, optional notes, optional due date, priority High, Normal or
+Low), see the open list (dated tasks first by due date, then priority, then newest), mark a
+task done, reopen it, and delete it; `/tasks/<id>/edit` changes the same four fields;
 see `how/tasks.md`.
 
 ## Key numbers

@@ -39,12 +39,13 @@ flowchart TD
 | The save server action (redirects to `/`)                     | `src/app/tasks/[id]/edit/actions.ts` → `saveTask`, `SaveTaskState`                                                                                                            |
 | The checkbox that submits its form on change                  | `src/app/components/task-checkbox.tsx` → `TaskCheckbox`                                                                                                                       |
 | The add form (client, `useActionState`)                       | `src/app/components/add-task-form.tsx` → `AddTaskForm`, `AddTaskFormView`                                                                                                     |
+| The four labelled fields shared by both forms                 | `src/app/components/task-fields.tsx` → `TaskFields`, `TaskFieldValues`, `TaskFieldErrors`                                                                                     |
 | The open and done lists                                       | `src/app/components/task-list.tsx` → `TaskList`                                                                                                                               |
 | The edit form (client, `useActionState`)                      | `src/app/components/edit-task-form.tsx` → `EditTaskForm`, `EditTaskFormView`                                                                                                  |
 | Reading and writing tasks                                     | `src/lib/tasks/repository.ts` → `listTasks`, `ListFilter`, `isOverdue`, `getTask`, `createTask`, `updateTask`, `setDone`, `deleteTask`                                        |
 | Validation rules and messages, and id/submitted-value parsing | `src/lib/tasks/validate.ts` → `parseTaskInput`, `parseDueOn`, `parsePriority`, `PRIORITY_LABELS`, `formDataToRaw`, `parseTaskId`, `submittedValues`, `TITLE_MAX`, `NOTES_MAX` |
 | The domain types                                              | `src/lib/tasks/types.ts` → `Task`, `TaskInput`, `Priority`                                                                                                                    |
-| Component tests of the forms                                  | `src/app/components/add-task-form.test.tsx`, `src/app/components/edit-task-form.test.tsx`                                                                                     |
+| Component tests of the forms                                  | `src/app/components/task-fields.test.tsx`, `src/app/components/add-task-form.test.tsx`, `src/app/components/edit-task-form.test.tsx`                                          |
 | End-to-end flow on a fresh database                           | `e2e/tasks.spec.ts`                                                                                                                                                           |
 
 ## The page
@@ -71,18 +72,30 @@ first by due date, then High before Normal before Low, then newest first), `done
 
 `AddTaskForm` is a `"use client"` component: `useActionState(addTask, {})` gives it the
 current `AddTaskState` and a form action; it renders `AddTaskFormView` with both. The view
-is a plain `<form action={formAction}>` with:
+is a plain `<form action={formAction}>` holding `<TaskFields idPrefix="add" />` and the
+submit button.
 
-| Field  | Control                                               | Accessible name |
-| ------ | ----------------------------------------------------- | --------------- |
-| title  | `input name="title"`, placeholder `What needs doing?` | `Title`         |
-| notes  | `textarea name="notes"`                               | `Notes`         |
-| submit | `button` `Add task`                                   |                 |
+`TaskFields({ idPrefix, values, errors })` in `src/app/components/task-fields.tsx` is the
+one place the task controls are written; the add and edit forms both render it, so a new
+field is added there once. It has no server imports (only `PRIORITY_LABELS` from
+`src/lib/tasks/validate.ts`), so it renders inside `"use client"` forms. `idPrefix`
+(`add` or `edit`) prefixes every control id, so two forms on one page never share one.
 
-`defaultValue` of each control comes from `state.values`, so after a validation error the
-submitted text stays in the field. The form element is keyed on `state.nonce`; a
-successful add returns a new nonce, React remounts the form, and both fields are empty
-again. Error text renders under its field in a `<p role="alert">`.
+| Field    | Control                                                                                         | Accessible name |
+| -------- | ----------------------------------------------------------------------------------------------- | --------------- |
+| title    | `input name="title"`, placeholder `What needs doing?`                                           | `Title`         |
+| notes    | `textarea name="notes"`                                                                         | `Notes`         |
+| dueOn    | `input type="date" name="dueOn"`, value `YYYY-MM-DD` or empty                                   | `Due`           |
+| priority | `select name="priority"`, options `1` High, `2` Normal, `3` Low (labels from `PRIORITY_LABELS`) | `Priority`      |
+| submit   | `button` `Add task` (add form) or `Save` (edit form)                                            |                 |
+
+`values` is `{ title, notes, dueOn, priority }` as strings, exactly the shape
+`submittedValues` returns; the add form passes `state.values` or, before any submit,
+`{ title: "", notes: "", dueOn: "", priority: "2" }` (so Normal is preselected).
+`defaultValue` of each control comes from those values, so after a validation error the
+submitted input stays in every field. The form element is keyed on `state.nonce`; a
+successful add returns a new nonce, React remounts the form, and all fields are back to
+their defaults. Each error renders under its field in a `<p role="alert">`.
 
 `AddTaskFormView` takes `state` and `action` as props so the component test renders it
 directly with a hand-made state and never touches a server action or a database.
@@ -120,7 +133,8 @@ read `id` (a positive integer string; anything else is ignored) and, for toggle,
 3. On `ok: true`: `createTask(getDb(), value)`, then `revalidatePath("/")`, then return
    `{ nonce: Date.now() }`.
 
-`AddTaskState` is `{ errors?: { title?, notes? }; values?: { title, notes }; nonce? }`.
+`AddTaskState` is `{ errors?: TaskInputErrors; values?: { title, notes, dueOn, priority }; nonce? }`
+(`values` is the return type of `submittedValues`).
 
 The validation messages, produced only in `src/lib/tasks/validate.ts`:
 
@@ -133,9 +147,9 @@ The validation messages, produced only in `src/lib/tasks/validate.ts`:
 | `priority` | missing, `null` or `""` is `2`; else `"1"`, `"2"`, `"3"` (or the number)        | `Priority must be high, normal or low.`   |
 
 `parseTaskInput` reports every failing field at once (`TaskInputErrors` has `title`,
-`notes`, `dueOn`, `priority`). The current forms send neither `dueOn` nor `priority`, so
-tasks are created undated with priority `2`; `formDataToRaw` and `submittedValues` already
-read both fields (`dueOn`, `priority`) for the forms that will.
+`notes`, `dueOn`, `priority`). Both forms send all four fields; an empty `dueOn` stores
+`null` and the select always sends a priority, `2` unless changed. `formDataToRaw` and
+`submittedValues` read all four.
 
 `getDb()` is imported only in the two `page.tsx` files and the two `actions.ts` files;
 client components receive plain data (`Task[]`) or the action function as props, so no
@@ -154,10 +168,11 @@ client components receive plain data (`Task[]`) or the action function as props,
 | anything else (`abc`, `0`, `-1`, `1.5`) | `notFound()`, HTTP status 404                             |
 
 `EditTaskForm` (`"use client"`) is `useActionState(saveTask, {})` over `EditTaskFormView`:
-a hidden `id`, `Title` and `Notes` inputs, a `Save` button and a `Cancel` link to `/`.
-`defaultValue` comes from `state.values` when the last save failed validation, otherwise
-from the `task` prop, so the user's text survives an error and the first render shows
-the stored values.
+a hidden `id`, `<TaskFields idPrefix="edit" />` (Title, Notes, Due, Priority), a `Save`
+button and a `Cancel` link to `/`. The values come from `state.values` when the last save
+failed validation, otherwise from the `task` prop as
+`{ title, notes, dueOn: task.dueOn ?? "", priority: String(task.priority) }`, so the user's
+input survives an error and the first render shows the stored values.
 
 `saveTask(prevState, formData)` in `src/app/tasks/[id]/edit/actions.ts`:
 
@@ -175,8 +190,9 @@ around them: a `catch` would swallow the redirect and the page would stay put.
 
 | Tier      | File                                         | Proves                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | --------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| component | `src/app/components/add-task-form.test.tsx`  | labels, placeholder and button render; error state renders one `role="alert"` per field and keeps values                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| component | `src/app/components/edit-task-form.test.tsx` | Title and Notes prefilled from the task, Save button, Cancel link to `/`; error state renders the alert and keeps the submitted values                                                                                                                                                                                                                                                                                                                                                                                                  |
+| component | `src/app/components/task-fields.test.tsx`    | the four labels, `type="date"` on Due, the three priority options with Normal selected; values prefill every control; one `role="alert"` per field error in field order; ids carry `idPrefix`                                                                                                                                                                                                                                                                                                                                           |
+| component | `src/app/components/add-task-form.test.tsx`  | labels, placeholder and button render with Due empty and Priority `2`; error state renders one `role="alert"` per field and keeps values, Due and Priority included; a new nonce clears the form                                                                                                                                                                                                                                                                                                                                        |
+| component | `src/app/components/edit-task-form.test.tsx` | Title, Notes, Due and Priority prefilled from the task (an undated Normal task shows empty Due and Normal), Save button, Cancel link to `/`; error state renders the alert and keeps the submitted values                                                                                                                                                                                                                                                                                                                               |
 | e2e       | `e2e/tasks.spec.ts`                          | empty state on a fresh database; adding `Buy milk` shows it first under `Open (1)` and clears the form; an empty title shows `Title is required.` and adds nothing; `Mark done: Buy milk` moves it under `Done (1)` struck through with `Open (0)`; `Reopen: Buy milk` moves it back; `Delete: Buy milk` returns the empty state; the edit page changes the title to `Buy oat milk` and notes to `2 litres` and the list shows both; an empty title on the edit page shows the error and changes nothing; `/tasks/999999/edit` is a 404 |
 
 The e2e file is one serial flow (`test.describe.configure({ mode: "serial" })`) on the
@@ -196,4 +212,5 @@ run's fresh `data/e2e-<timestamp>.db`.
 | saving a valid edit shows the list unchanged and stays on the edit page         | `redirect("/")` was wrapped in `try/catch` and the thrown redirect was swallowed                                       | keep `redirect` and `notFound` outside any `try` block in `saveTask`                                       |
 | the edit page renders for a deleted task, or the id reads as `[object Promise]` | `params` was used without `await`                                                                                      | `const { id } = await params` in `EditTaskPage`                                                            |
 | the edit form shows the old text after a validation error                       | `defaultValue` reads only from the `task` prop                                                                         | read `state.values ?? task` (`EditTaskFormView`)                                                           |
+| a field renders in one form but not the other                                   | the control was added to a form file instead of `TaskFields`                                                           | add controls only in `src/app/components/task-fields.tsx`; both forms render it                            |
 | e2e sees rows from an earlier run                                               | `DATABASE_PATH` was set explicitly to a reused file                                                                    | unset it; `playwright.config.ts` picks `data/e2e-<timestamp>.db` per run; `rm -f data/e2e-*.db*` cleans up |

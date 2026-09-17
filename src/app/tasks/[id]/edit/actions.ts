@@ -9,11 +9,13 @@ import {
   parseTaskId,
   parseTaskInput,
   submittedValues,
+  type TaskInputErrors,
 } from "@/lib/tasks/validate";
 
 export type SaveTaskState = {
-  errors?: { title?: string; notes?: string };
-  values?: { title: string; notes: string };
+  errors?: TaskInputErrors;
+  /** The submitted strings (`dueOn` and `priority` included), kept on error. */
+  values?: ReturnType<typeof submittedValues>;
 };
 
 /**

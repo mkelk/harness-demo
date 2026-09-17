@@ -15,6 +15,8 @@ describe("AddTaskFormView", () => {
       "What needs doing?",
     );
     expect(screen.getByLabelText("Notes")).toBeInTheDocument();
+    expect(screen.getByLabelText("Due")).toHaveValue("");
+    expect(screen.getByLabelText("Priority")).toHaveValue("2");
     expect(
       screen.getByRole("button", { name: "Add task" }),
     ).toBeInTheDocument();
@@ -26,7 +28,12 @@ describe("AddTaskFormView", () => {
       <AddTaskFormView
         state={{
           errors: { title: "Title is required.", notes: "Notes too long." },
-          values: { title: "", notes: "some notes" },
+          values: {
+            title: "",
+            notes: "some notes",
+            dueOn: "2026-09-30",
+            priority: "3",
+          },
         }}
         action={vi.fn()}
       />,
@@ -37,6 +44,8 @@ describe("AddTaskFormView", () => {
       "Notes too long.",
     ]);
     expect(screen.getByLabelText("Notes")).toHaveValue("some notes");
+    expect(screen.getByLabelText("Due")).toHaveValue("2026-09-30");
+    expect(screen.getByLabelText("Priority")).toHaveValue("3");
   });
 
   it("clears the Title field when a new nonce remounts the form", async () => {
