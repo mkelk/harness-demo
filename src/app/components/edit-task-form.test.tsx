@@ -11,6 +11,8 @@ const task: Task = {
   id: 7,
   title: "Buy milk",
   notes: "Semi-skimmed",
+  dueOn: null,
+  priority: 2,
   doneAt: null,
   createdAt: "2026-09-17T10:00:00.000Z",
   updatedAt: "2026-09-17T10:00:00.000Z",

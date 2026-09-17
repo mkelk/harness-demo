@@ -2,7 +2,13 @@ import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { applyMigrations, createTestDb, openDatabase } from "./index";
+import {
+  applyMigrations,
+  createTestDb,
+  MIGRATIONS,
+  openDatabase,
+} from "./index";
+import { migration0001 } from "./migrations/0001_tasks";
 
 const dirs: string[] = [];
 
@@ -25,12 +31,15 @@ describe("openDatabase", () => {
     db.close();
   });
 
-  it("applies migration 0001 and creates the tasks table", () => {
+  it("applies migrations 0001 and 0002 and creates the tasks table", () => {
     const db = openDatabase(join(freshDir(), "app.db"));
     const rows = db
       .prepare("SELECT version, name FROM schema_migrations ORDER BY version")
       .all();
-    expect(rows).toEqual([{ version: 1, name: "tasks" }]);
+    expect(rows).toEqual([
+      { version: 1, name: "tasks" },
+      { version: 2, name: "task_schedule" },
+    ]);
     const columns = db
       .prepare("PRAGMA table_info(tasks)")
       .all()
@@ -42,6 +51,8 @@ describe("openDatabase", () => {
       "done_at",
       "created_at",
       "updated_at",
+      "due_on",
+      "priority",
     ]);
     db.close();
   });
@@ -58,6 +69,20 @@ describe("openDatabase", () => {
 });
 
 describe("applyMigrations", () => {
+  it("applies exactly migration 0002 on a db that already had 0001", () => {
+    const { db, close } = createTestDb();
+    // createTestDb applies MIGRATIONS; start again from a db with only 0001.
+    db.exec("DROP TABLE tasks; DROP TABLE schema_migrations");
+    expect(applyMigrations(db, [migration0001])).toBe(1);
+    expect(applyMigrations(db, MIGRATIONS)).toBe(1);
+    const rows = db
+      .prepare("SELECT version FROM schema_migrations ORDER BY version")
+      .all()
+      .map((row) => (row as { version: number }).version);
+    expect(rows).toEqual([1, 2]);
+    close();
+  });
+
   it("applies a custom migration once", () => {
     const { db, close } = createTestDb();
     const custom = [{ version: 7, name: "x", sql: "CREATE TABLE x(a)" }];
