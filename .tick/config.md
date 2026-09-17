@@ -58,9 +58,10 @@ Living documentation is a deliverable of every epic. The specification is
      false, delete what no longer exists. Check shape: every `how/` page opens with its
      diagram and carries a key-entry-points table; a page holding two concerns is split.
   3. Render diagrams: for every id `pnpm docs:check` reports `missing` or `stale`,
-     invoke the `diagram-design` skill on the Mermaid block (`/diagram-design:import-mermaid`,
-     or follow its `references/import-mermaid.md` procedure directly when the skill is
-     not loaded in the session) and write `docs/current/diagrams/<id>.svg`. Then
+     invoke the vendored `diagram-design` skill on the Mermaid block (project command
+     `/diagram-import-mermaid`, or follow
+     `.claude/skills/diagram-design/references/import-mermaid.md` directly when the skill
+     is not loaded in the session) and write `docs/current/diagrams/<id>.svg`. Then
      `pnpm docs:check --stamp`.
   4. Refresh `_overview.md` (inventory, Diagrams table, the date line naming the epic)
      and `README.md`'s document map.

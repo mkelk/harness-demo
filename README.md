@@ -33,14 +33,19 @@ Setup, test tiers and architecture: [`docs/current/setup.md`](docs/current/setup
 
 dmtix is a delivery method (the "devmeta" increment discipline) running on the **ticks**
 engine (`tk`, an issue tracker built for agents, plus the `ticks` skill that runs epics
-as waves of implementer agents in git worktrees). The method and the engine are
-installed once per machine as Claude Code skills; this repo only carries their
-project-side state.
+as waves of implementer agents in git worktrees). Both are **vendored into this repo**
+under `.claude/skills/` (pinned mode, each with a `PROVENANCE.md` naming its upstream and
+date), together with the `diagram-design` skill the docs pipeline uses, so a clone is
+self-contained: nothing is read from the user's home directory.
 
-| Layer                                      | Source                                                                                                                                   | In this repo                                                                       |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Method: `/dmtix bootstrap`, `start`, `go`  | [github.com/mkelk/skills](https://github.com/mkelk/skills) → `skills/dmtix`                                                              | `.tick/config.md` (contract), `.devmeta/` (records)                                |
-| Engine: the `ticks` skill and the `tk` CLI | [github.com/mkelk/ticks-melk](https://github.com/mkelk/ticks-melk) (fork of [pengelbrecht/ticks](https://github.com/pengelbrecht/ticks)) | `.tick/` (tracker, committed), `.tick/profile.md` (inferred), `.tick/learnings.md` |
+| Layer                                      | Source                                                                                                                                   | In this repo                                                                                                           |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Method: `/dmtix bootstrap`, `start`, `go`  | [github.com/mkelk/skills](https://github.com/mkelk/skills) → `skills/dmtix`                                                              | `.claude/skills/dmtix/` (vendored), `.tick/config.md` (contract), `.devmeta/` (records)                                |
+| Engine: the `ticks` skill and the `tk` CLI | [github.com/mkelk/ticks-melk](https://github.com/mkelk/ticks-melk) (fork of [pengelbrecht/ticks](https://github.com/pengelbrecht/ticks)) | `.claude/skills/ticks/` (vendored), `.tick/` (tracker, committed), `.tick/profile.md` (inferred), `.tick/learnings.md` |
+| Diagrams: the `diagram-design` skill       | [github.com/cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) (MIT, plugin 2.6.22)                          | `.claude/skills/diagram-design/` (vendored), `.claude/commands/diagram-import-mermaid.md`                              |
+
+The only tool a clone needs from outside the repo is the `tk` CLI
+(`curl -fsSL https://ticks.sh/install | sh`, 0.29 or newer).
 
 ### The rhythm
 
@@ -150,17 +155,18 @@ the Mermaid; the orchestrator renders and stamps.
 
 ### Where things live
 
-| What                                                            | Where                                                     |
-| --------------------------------------------------------------- | --------------------------------------------------------- |
-| Standing method contract (edit only to change how you work)     | `.tick/config.md`                                         |
-| Live state                                                      | `tk roadmap`, `tk board`, `.devmeta/current-increment.md` |
-| Inferred execution facts (never hand-edited)                    | `.tick/profile.md`                                        |
-| Operational gotchas for implementers                            | `.tick/learnings.md`                                      |
-| Increment records: overview, per-epic retros, completion report | `.devmeta/increments/increment-NN-xxx/`                   |
-| Narrative history, oldest first                                 | `.devmeta/project-history.md`                             |
-| Increment specs and dated thinking                              | `docs/thoughts/YYYY-MM-DD-*.md`                           |
-| Living documentation of the app                                 | `docs/current/`                                           |
-| Agent instructions (one canonical file)                         | `AGENTS.md` (`CLAUDE.md` imports it)                      |
+| What                                                            | Where                                                                  |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Standing method contract (edit only to change how you work)     | `.tick/config.md`                                                      |
+| The skills themselves, pinned                                   | `.claude/skills/{dmtix,ticks,diagram-design}/`, a `PROVENANCE.md` each |
+| Live state                                                      | `tk roadmap`, `tk board`, `.devmeta/current-increment.md`              |
+| Inferred execution facts (never hand-edited)                    | `.tick/profile.md`                                                     |
+| Operational gotchas for implementers                            | `.tick/learnings.md`                                                   |
+| Increment records: overview, per-epic retros, completion report | `.devmeta/increments/increment-NN-xxx/`                                |
+| Narrative history, oldest first                                 | `.devmeta/project-history.md`                                          |
+| Increment specs and dated thinking                              | `docs/thoughts/YYYY-MM-DD-*.md`                                        |
+| Living documentation of the app                                 | `docs/current/`                                                        |
+| Agent instructions (one canonical file)                         | `AGENTS.md` (`CLAUDE.md` imports it)                                   |
 
 ### Reading a finished increment
 

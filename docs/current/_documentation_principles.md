@@ -112,9 +112,9 @@ gives the shape.
   brackets in this sentence are what keep this example from counting).
 - **The `diagram-design` skill renders an editorial SVG** next to it at
   `docs/current/diagrams/<id>.svg`, and the page shows the SVG above the Mermaid block:
-  `![Title](../diagrams/<id>.svg)`. Rendering is a skill invocation, not a binary; the
-  project marker `.diagram-design` selects the `default` profile so the skill runs without
-  a first-time prompt.
+  `![Title](../diagrams/<id>.svg)`. Rendering is a skill invocation, not a binary. The skill
+  is vendored at `.claude/skills/diagram-design/` (command `/diagram-import-mermaid`); its
+  style guide carries a profile header for this repo, so it runs without a first-time prompt.
 - **A stamp proves the SVG matches the Mermaid.** `pnpm docs:check --stamp` writes
   `diagrams/<id>.sha` (SHA-256 of the block). `pnpm docs:check` fails a stale stamp;
   `--strict` also fails a missing SVG.

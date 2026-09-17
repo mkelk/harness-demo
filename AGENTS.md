@@ -23,14 +23,14 @@ Read `README.md` for the project and the method, `docs/current/` for how the app
 
 ## Where things live
 
-| Concern                               | Where                                                                       |
-| ------------------------------------- | --------------------------------------------------------------------------- |
-| Method (how we work)                  | `.tick/config.md` (engine contract), `README.md` → "How dmtix is used here" |
-| Live state of the work                | `tk roadmap`, `tk board`, `.devmeta/current-increment.md`                   |
-| Narrative records                     | `.devmeta/increments/<id>/`, `.devmeta/project-history.md`                  |
-| Operational gotchas for agents        | `.tick/learnings.md` (read in full, hard cap 150 lines)                     |
-| Living docs (current truth)           | `docs/current/` (index: `docs/current/_overview.md`)                        |
-| Dated exploration and increment specs | `docs/thoughts/YYYY-MM-DD-slug.md`                                          |
+| Concern                               | Where                                                                                                                |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Method (how we work)                  | `.tick/config.md` (engine contract), `README.md` → "How dmtix is used here"; skills vendored under `.claude/skills/` |
+| Live state of the work                | `tk roadmap`, `tk board`, `.devmeta/current-increment.md`                                                            |
+| Narrative records                     | `.devmeta/increments/<id>/`, `.devmeta/project-history.md`                                                           |
+| Operational gotchas for agents        | `.tick/learnings.md` (read in full, hard cap 150 lines)                                                              |
+| Living docs (current truth)           | `docs/current/` (index: `docs/current/_overview.md`)                                                                 |
+| Dated exploration and increment specs | `docs/thoughts/YYYY-MM-DD-slug.md`                                                                                   |
 
 ## Commands
 

@@ -1,7 +1,7 @@
 # Increment 01-rxx — Task basics
 
 **Status:** SHIPPED 2026-09-17 (merged to main)
-**Engine:** synthesized ticks skill (user-level `~/.claude/skills/ticks/`, shared mode; not vendored)
+**Engine:** synthesized ticks skill (ran from user level `~/.claude/skills/ticks/`; vendored into `.claude/skills/ticks/` after the increment shipped, see its `PROVENANCE.md`)
 **Spec:** `docs/thoughts/2026-09-17-increment-01-task-basics.md` (source of truth for every epic)
 
 ## Goal

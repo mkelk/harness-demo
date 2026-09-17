@@ -6,3 +6,4 @@ playwright-report
 test-results
 .tick/issues
 .tick/logs
+.claude/skills
