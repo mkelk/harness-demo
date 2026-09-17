@@ -2,7 +2,7 @@
   "id": "6vt",
   "title": "Final review of Task list diff",
   "description": "Read-only frontier review of the epic's full diff from tag 01-rxx.persistence-foundation to HEAD against the spec's 'On screen' and 'Definitions of done → Epic 2'. Axes: spec compliance (accessible names, messages, ordering, 404), correctness (server actions, revalidation, redirect), security (id parsing, no client import of server code), test quality (e2e independence, component tests), doc accuracy. Blockers become repair ticks.",
-  "status": "open",
+  "status": "in_progress",
   "priority": 2,
   "type": "task",
   "owner": "morten@elk.dk",
@@ -13,5 +13,6 @@
   "role": "review",
   "created_by": "morten@elk.dk",
   "created_at": "2026-09-17T13:17:48.12149046Z",
-  "updated_at": "2026-09-17T13:17:48.12149046Z"
+  "updated_at": "2026-09-17T13:30:34.503531542Z",
+  "started_at": "2026-09-17T13:30:34.503529248Z"
 }
