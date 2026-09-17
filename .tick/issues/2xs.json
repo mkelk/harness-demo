@@ -1,0 +1,14 @@
+{
+  "id": "2xs",
+  "title": "Organise",
+  "description": "The user can give a task a due date and a priority, see what is overdue, put tasks into lists, look at one list at a time, and narrow the list by state or by a search word. Overview: .devmeta/increments/increment-02-ngm/_overview.md. Spec: docs/thoughts/2026-09-17-increment-02-organise.md",
+  "notes": "2026-09-17 15:42 - base-branch: 2026-09-17-increment-02 (project ticks cannot carry --base-branch in tk 0.29)",
+  "status": "open",
+  "priority": 2,
+  "type": "task",
+  "owner": "morten@elk.dk",
+  "target_date": "2026-09-19",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T13:42:29.750864266Z",
+  "updated_at": "2026-09-17T13:42:29.814686363Z"
+}

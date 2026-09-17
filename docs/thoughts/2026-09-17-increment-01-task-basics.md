@@ -40,10 +40,10 @@ changes nothing. Nothing else.
 
 ### Validation (shown to the user, tested in `src/lib`)
 
-| Field | Rule | Message |
-|---|---|---|
-| `title` | trimmed, 1 to 200 characters | "Title is required." (empty) / "Title must be 200 characters or fewer." |
-| `notes` | trimmed, 0 to 2000 characters | "Notes must be 2000 characters or fewer." |
+| Field   | Rule                          | Message                                                                 |
+| ------- | ----------------------------- | ----------------------------------------------------------------------- |
+| `title` | trimmed, 1 to 200 characters  | "Title is required." (empty) / "Title must be 200 characters or fewer." |
+| `notes` | trimmed, 0 to 2000 characters | "Notes must be 2000 characters or fewer."                               |
 
 Invalid input is never persisted.
 
@@ -51,48 +51,48 @@ Invalid input is never persisted.
 
 ### Persistence (`src/lib/db/`)
 
-| File | Export | Contract |
-|---|---|---|
-| `open.ts` | `openDatabase(path: string): DatabaseSync` | opens (creates) the SQLite file with `node:sqlite`, sets `PRAGMA journal_mode = WAL` and `PRAGMA foreign_keys = ON`, creates the parent directory if missing, applies pending migrations, returns the handle |
-| `migrate.ts` | `applyMigrations(db, migrations = MIGRATIONS)`, `MIGRATIONS: Migration[]` | `schema_migrations(version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL)`; each migration `{version, name, sql}` runs once inside a transaction, in ascending version order; re-running is a no-op |
-| `migrations/0001_tasks.ts` | `migration0001` | the `tasks` table below |
-| `client.ts` | `getDb(): DatabaseSync` | process-wide singleton for the app, path from `readEnv().databasePath`; only server code imports it |
-| `test-db.ts` | `createTestDb(): { db, path, close(): void }` | a migrated database in a fresh temp file (`os.tmpdir()`), `close()` closes and deletes the file and its `-wal`/`-shm` siblings |
+| File                       | Export                                                                    | Contract                                                                                                                                                                                                                |
+| -------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open.ts`                  | `openDatabase(path: string): DatabaseSync`                                | opens (creates) the SQLite file with `node:sqlite`, sets `PRAGMA journal_mode = WAL` and `PRAGMA foreign_keys = ON`, creates the parent directory if missing, applies pending migrations, returns the handle            |
+| `migrate.ts`               | `applyMigrations(db, migrations = MIGRATIONS)`, `MIGRATIONS: Migration[]` | `schema_migrations(version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL)`; each migration `{version, name, sql}` runs once inside a transaction, in ascending version order; re-running is a no-op |
+| `migrations/0001_tasks.ts` | `migration0001`                                                           | the `tasks` table below                                                                                                                                                                                                 |
+| `client.ts`                | `getDb(): DatabaseSync`                                                   | process-wide singleton for the app, path from `readEnv().databasePath`; only server code imports it                                                                                                                     |
+| `test-db.ts`               | `createTestDb(): { db, path, close(): void }`                             | a migrated database in a fresh temp file (`os.tmpdir()`), `close()` closes and deletes the file and its `-wal`/`-shm` siblings                                                                                          |
 
 Migrations are TypeScript modules exporting SQL strings (not `.sql` files) so that
 `next build` bundles them without a file-system read at runtime.
 
 ### Table `tasks` (migration 0001)
 
-| Column | Type | Constraint | Meaning |
-|---|---|---|---|
-| `id` | INTEGER | PRIMARY KEY AUTOINCREMENT | |
-| `title` | TEXT | NOT NULL, `length(title) BETWEEN 1 AND 200` | trimmed |
-| `notes` | TEXT | NOT NULL DEFAULT '' | trimmed, up to 2000 |
-| `done_at` | TEXT | NULL | ISO 8601 UTC when done, NULL when open |
-| `created_at` | TEXT | NOT NULL | ISO 8601 UTC |
-| `updated_at` | TEXT | NOT NULL | ISO 8601 UTC, set on every write |
+| Column       | Type    | Constraint                                  | Meaning                                |
+| ------------ | ------- | ------------------------------------------- | -------------------------------------- |
+| `id`         | INTEGER | PRIMARY KEY AUTOINCREMENT                   |                                        |
+| `title`      | TEXT    | NOT NULL, `length(title) BETWEEN 1 AND 200` | trimmed                                |
+| `notes`      | TEXT    | NOT NULL DEFAULT ''                         | trimmed, up to 2000                    |
+| `done_at`    | TEXT    | NULL                                        | ISO 8601 UTC when done, NULL when open |
+| `created_at` | TEXT    | NOT NULL                                    | ISO 8601 UTC                           |
+| `updated_at` | TEXT    | NOT NULL                                    | ISO 8601 UTC, set on every write       |
 
 Index: `tasks_open_idx ON tasks(done_at, created_at DESC)`.
 
 ### Domain (`src/lib/tasks/`)
 
-| File | Export | Contract |
-|---|---|---|
-| `types.ts` | `Task = { id: number; title: string; notes: string; doneAt: string \| null; createdAt: string; updatedAt: string }`, `TaskInput = { title: string; notes: string }` | |
-| `validate.ts` | `parseTaskInput(raw: { title?: unknown; notes?: unknown }): { ok: true; value: TaskInput } \| { ok: false; errors: { title?: string; notes?: string } }` | the validation table above; non-string values are treated as empty strings |
+| File            | Export                                                                                                                                                                                                                                                          | Contract                                                                                                                                                                                                                                              |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `types.ts`      | `Task = { id: number; title: string; notes: string; doneAt: string \| null; createdAt: string; updatedAt: string }`, `TaskInput = { title: string; notes: string }`                                                                                             |                                                                                                                                                                                                                                                       |
+| `validate.ts`   | `parseTaskInput(raw: { title?: unknown; notes?: unknown }): { ok: true; value: TaskInput } \| { ok: false; errors: { title?: string; notes?: string } }`                                                                                                        | the validation table above; non-string values are treated as empty strings                                                                                                                                                                            |
 | `repository.ts` | `listTasks(db): { open: Task[]; done: Task[] }`, `getTask(db, id): Task \| null`, `createTask(db, input: TaskInput): Task`, `updateTask(db, id, input: TaskInput): Task \| null`, `setDone(db, id, done: boolean): Task \| null`, `deleteTask(db, id): boolean` | every function takes the `DatabaseSync` handle as its first argument so tests pass a temp database; `setDone(true)` on a done task and `setDone(false)` on an open task are no-ops that return the task; `updateTask` and `setDone` bump `updated_at` |
 
 Ordering: `open` by `created_at DESC, id DESC`; `done` by `done_at DESC, id DESC`.
 
 ### App (`src/app/`)
 
-| File | Contract |
-|---|---|
-| `page.tsx` | server component; calls `listTasks(getDb())`; renders `AddTaskForm` and `TaskList` |
-| `actions.ts` | `"use server"`: `addTask(prev, formData)`, `toggleTask(formData)`, `removeTask(formData)`; each parses form data, calls one repository function, `revalidatePath("/")` |
-| `tasks/[id]/edit/page.tsx`, `tasks/[id]/edit/actions.ts` | the edit page and `saveTask(prev, formData)` which redirects to `/` on success |
-| `components/add-task-form.tsx`, `components/task-list.tsx`, `components/edit-task-form.tsx` | client components using `useActionState` for the forms |
+| File                                                                                        | Contract                                                                                                                                                               |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `page.tsx`                                                                                  | server component; calls `listTasks(getDb())`; renders `AddTaskForm` and `TaskList`                                                                                     |
+| `actions.ts`                                                                                | `"use server"`: `addTask(prev, formData)`, `toggleTask(formData)`, `removeTask(formData)`; each parses form data, calls one repository function, `revalidatePath("/")` |
+| `tasks/[id]/edit/page.tsx`, `tasks/[id]/edit/actions.ts`                                    | the edit page and `saveTask(prev, formData)` which redirects to `/` on success                                                                                         |
+| `components/add-task-form.tsx`, `components/task-list.tsx`, `components/edit-task-form.tsx` | client components using `useActionState` for the forms                                                                                                                 |
 
 ### Guards added
 
@@ -101,21 +101,21 @@ Ordering: `open` by `created_at DESC, id DESC`; `done` by `done_at DESC, id DESC
 
 ### Documentation added (in the shape of `_documentation_principles.md`)
 
-| Page | Tier | Diagram id | Written in |
-|---|---|---|---|
-| `how/persistence.md` | 2 | `persistence` (open → migrate → handle; test db lifecycle) | epic 1 |
-| `data-model.md` | 3 | `data-model` (ER of `tasks` and `schema_migrations`) | epic 1 |
-| `how/tasks.md` | 2 | `task-flow` (form → server action → validate → repository → revalidate) | epic 2 |
-| `setup.md`, `README.md`, `how/architecture.md` | | | updated where the epic changed a fact |
+| Page                                           | Tier | Diagram id                                                              | Written in                            |
+| ---------------------------------------------- | ---- | ----------------------------------------------------------------------- | ------------------------------------- |
+| `how/persistence.md`                           | 2    | `persistence` (open → migrate → handle; test db lifecycle)              | epic 1                                |
+| `data-model.md`                                | 3    | `data-model` (ER of `tasks` and `schema_migrations`)                    | epic 1                                |
+| `how/tasks.md`                                 | 2    | `task-flow` (form → server action → validate → repository → revalidate) | epic 2                                |
+| `setup.md`, `README.md`, `how/architecture.md` |      |                                                                         | updated where the epic changed a fact |
 
 ## Not included
 
-| Deferred | Why |
-|---|---|
-| Due dates, priority, lists, search | increment 02 |
-| Drag ordering | needs a position column and a client-side interaction model; not basic |
-| Undo after delete | UX nicety, no new structure |
-| Pagination | a single-user list will not reach a size that needs it in this demo |
+| Deferred                           | Why                                                                    |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| Due dates, priority, lists, search | increment 02                                                           |
+| Drag ordering                      | needs a position column and a client-side interaction model; not basic |
+| Undo after delete                  | UX nicety, no new structure                                            |
+| Pagination                         | a single-user list will not reach a size that needs it in this demo    |
 
 ## Epics
 
@@ -123,10 +123,10 @@ Partitioned by hard sequencing, not by feature: the domain and persistence layer
 exist before any page can be tested end to end, and the two pages share one records file
 and one docs page, so they run as one warm-chain.
 
-| Epic | Scope | Ticks (planned just in time by the run; this is the expected shape) | Dep |
-|---|---|---|---|
-| 1 Persistence foundation | `src/lib/db/*`, `tasks` table, `src/lib/tasks/*`, guard test, `how/persistence.md`, `data-model.md` | wave 1: open + migrate + test db + migration 0001 + guard test + docs (solo; also discovers the worktree provisioning recipe). wave 2: repository (integration tests) ∥ validation (unit tests), disjoint files | |
-| 2 Task list | `/` and `/tasks/<id>/edit`, server actions, components, e2e, `how/tasks.md` | one warm-chain: list + add → done/reopen/delete → edit | blocked by 1 |
+| Epic                     | Scope                                                                                               | Ticks (planned just in time by the run; this is the expected shape)                                                                                                                                             | Dep          |
+| ------------------------ | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| 1 Persistence foundation | `src/lib/db/*`, `tasks` table, `src/lib/tasks/*`, guard test, `how/persistence.md`, `data-model.md` | wave 1: open + migrate + test db + migration 0001 + guard test + docs (solo; also discovers the worktree provisioning recipe). wave 2: repository (integration tests) ∥ validation (unit tests), disjoint files |              |
+| 2 Task list              | `/` and `/tasks/<id>/edit`, server actions, components, e2e, `how/tasks.md`                         | one warm-chain: list + add → done/reopen/delete → edit                                                                                                                                                          | blocked by 1 |
 
 ## Definitions of done
 
