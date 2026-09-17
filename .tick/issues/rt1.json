@@ -1,0 +1,19 @@
+{
+  "id": "rt1",
+  "title": "Close out Persistence foundation: run epic retro, then flesh out the next feasible epic into ticks",
+  "description": "Run the epic-close retro (harvest, promote by tier, compact .tick/learnings.md, outside-in verification of the epic acceptance with the Acceptance Evidence commands, drift review, retro report), execute .tick/config.md → At epic close-out (ia-cycles report, project-history entry, _overview update, living-docs audit with diagram render + stamp, tag), close the epic, then plan epic 5qb (Task list) into ticks including its EPIC-SKELETON.",
+  "status": "closed",
+  "priority": 2,
+  "type": "task",
+  "owner": "morten@elk.dk",
+  "blocked_by": [
+    "me4"
+  ],
+  "parent": "azj",
+  "role": "closeout",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T12:57:07.651619399Z",
+  "updated_at": "2026-09-17T13:16:26.339837488Z",
+  "closed_at": "2026-09-17T13:16:26.339837488Z",
+  "closed_reason": "Completed: retro written, learnings promoted, docs audited and rendered, tagged 01-rxx.persistence-foundation; next: plan epic 5qb"
+}

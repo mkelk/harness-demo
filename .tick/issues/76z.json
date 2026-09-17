@@ -1,0 +1,20 @@
+{
+  "id": "76z",
+  "title": "Complete, reopen and delete tasks from the list",
+  "description": "Source of truth: docs/thoughts/2026-09-17-increment-01-task-basics.md → 'On screen → / the task list' (checkbox accessible names, Done section with reopen, Delete buttons) and 'Definitions of done → Epic 2'. The list page, addTask action, components and how/tasks.md exist from the previous tick in this chain: read them.\n\nDeliver:\n- src/app/actions.ts: add `toggleTask(formData: FormData): Promise\u003cvoid\u003e` reading `id` (number) and `done` (\"true\"/\"false\") from the form data, calling setDone(getDb(), id, done === \"true\") then revalidatePath(\"/\"); and `removeTask(formData: FormData): Promise\u003cvoid\u003e` reading `id`, calling deleteTask then revalidatePath(\"/\"). Invalid or unknown ids are ignored silently (no throw), the page simply re-renders.\n- src/app/components/task-list.tsx: each open row gets a form with hidden inputs id and done=\"true\" and a checkbox `aria-label=\"Mark done: \u003ctitle\u003e\"` that submits its form on change (a tiny client component `TaskCheckbox` with \"use client\" that calls `event.currentTarget.form?.requestSubmit()`), plus a Delete button in its own form (`aria-label=\"Delete: \u003ctitle\u003e\"`, hidden input id, formAction={removeTask}). Each done row: checked checkbox `aria-label=\"Reopen: \u003ctitle\u003e\"` submitting done=\"false\", struck-through title, Delete button.\n- e2e/tasks.spec.ts: add, after the existing tests, \"marks a task done and moves it under Done (1) struck through\", \"reopens a done task\", \"deletes a task and returns to the empty state\" — chained on the same 'Buy milk' task in serial mode; assert `Open (0)`/`Done (1)` headings and that the done title has the line-through class or is inside the Done section (use `page.getByRole(\"heading\", { name: \"Done (1)\" })` and locator chaining).\n- Docs: extend docs/current/how/tasks.md: the key-entry-points table gains toggleTask, removeTask, TaskCheckbox; the mechanism section documents the hidden-input form pattern and the accessible names exactly (\"Mark done: \u003ctitle\u003e\", \"Reopen: \u003ctitle\u003e\", \"Delete: \u003ctitle\u003e\"); update the Mermaid block only if the flow shape changed (it does not: same action pipeline; you may add one line for toggle/remove reaching setDone/deleteTask). Refresh the last-update line in _overview.md.\nFiles likely touched: src/app/actions.ts, src/app/components/task-list.tsx, src/app/components/task-checkbox.tsx (new), e2e/tasks.spec.ts, docs/current/how/tasks.md, docs/current/_overview.md.\nRun in-worktree: pnpm typecheck \u0026\u0026 pnpm lint \u0026\u0026 pnpm test \u0026\u0026 pnpm docs:check",
+  "notes": "2026-09-17 15:18 - runner-state: runner=claude branch=tick/5qb/chain-swe-76z-xgu worktree=../.ticks-worktrees/chain-5qb base=0d10bf13e8bb46861dae001f19b8b4534589cd53 mode=warm-chain(swe→76z→xgu) tier=strong\n2026-09-17 15:30 - Post-merge e2e failure: getByRole('alert') matched Next's __next-route-announcer__ too (strict mode). Orchestrator fixed with .filter({hasText}) (mechanical); promoted to learnings.",
+  "status": "closed",
+  "priority": 2,
+  "type": "task",
+  "owner": "morten@elk.dk",
+  "blocked_by": [
+    "swe"
+  ],
+  "parent": "5qb",
+  "acceptance_criteria": "In-worktree gates pass. Post-merge: pnpm test:e2e passes the six tasks.spec.ts tests. Accessible names exactly as specified. how/tasks.md documents toggle and remove.",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T13:17:48.091325922Z",
+  "updated_at": "2026-09-17T13:30:24.493484826Z",
+  "closed_at": "2026-09-17T13:30:24.402271662Z",
+  "closed_reason": "Completed: Complete, reopen and delete tasks from the list (chain integrated, post-merge gate green: 44 vitest, 10 e2e)"
+}

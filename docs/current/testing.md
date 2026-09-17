@@ -26,15 +26,20 @@ the orchestrator runs it on the integrated tree before a wave closes.
 
 ## Writing a test
 
-- Unit and component tests sit next to the code they test (`src/lib/tasks.test.ts`
-  beside `src/lib/tasks.ts`).
-- Integration tests open a fresh database with `createTestDb()` from `src/lib/db/`
-  (once the persistence layer exists): a temp file per test, migrated, deleted after.
-  Never `data/dev.db`.
-- E2E tests use `page.getByRole` and visible text, not CSS selectors, and each test
-  creates the data it needs; the e2e database is thrown away per run.
+- Unit and component tests sit next to the code they test (`src/lib/tasks/validate.test.ts`
+  beside `src/lib/tasks/validate.ts`).
+- Integration tests open a fresh database with `createTestDb()` from `src/lib/db/`: a
+  temp file per test, migrated, removed by `close()`. Never `data/dev.db`.
+- E2E tests use `page.getByRole`, `getByLabel` and visible text, not CSS selectors.
+  `e2e/tasks.spec.ts` is one serial flow (`test.describe.configure({ mode: "serial" })`)
+  on a fresh per-run database (`data/e2e-<timestamp>.db`): later tests build on rows
+  earlier tests created, so `playwright.config.ts` sets `retries: 0` (a retry cannot
+  start from a fresh database, and would repeat later steps against rows earlier steps
+  already changed).
 - The repo guards (`scripts/check-docs.test.ts`) test the checker against temp
-  directories, never against the real `docs/current/`.
+  directories, never against the real `docs/current/`; `scripts/check-rules.test.ts`
+  walks the real `src/` for `process.env` outside `src/lib/env.ts` and `node:sqlite`
+  outside `src/lib/db/`.
 
 ## Failure modes
 
