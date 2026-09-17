@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 960 620" role="img" aria-labelledby="persistence-title persistence-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="persistence-title">Persistence: how a database handle is made</title>
+  <desc id="persistence-desc">Two callers reach openDatabase: getDb, the app's once-per-process handle at the path from readEnv, and createTestDb, once per test at a temp file whose close removes the temp directory. openDatabase creates the parent directory, sets PRAGMA journal_mode WAL and foreign_keys ON, then runs applyMigrations. For each migration, if its version is already in schema_migrations it is skipped; otherwise it runs inside a transaction: BEGIN, the SQL, an insert into the ledger, COMMIT, with ROLLBACK on error. Either way the DatabaseSync handle is returned.</desc>
+  <defs><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+    <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+    <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+  </defs>
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+  <text x="40" y="52" fill="#2d3142" font-size="28" font-family="'Instrument Serif', serif">Persistence</text>
+  <text x="40" y="74" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">OPEN, MIGRATE, HAND OUT</text>
+<path d="M 125,140 V 220" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="137" y="153" width="80.8" height="12" rx="2" fill="#f5f5f5"/>
+<text x="137" y="162" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">ONCE / PROCESS</text>
+<path d="M 350,140 V 172 Q 350,180 342,180 H 188 Q 180,180 180,188 V 220" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="229.4" y="157" width="65.2" height="12" rx="2" fill="#f5f5f5"/>
+<text x="262" y="166" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">ONCE / TEST</text>
+<path d="M 220,250 H 260" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M 420,250 H 460" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M 640,250 H 680" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M 770,280 V 340" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="780" y="306" width="80.8" height="12" rx="2" fill="#f5f5f5"/>
+<text x="780" y="315" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">EACH MIGRATION</text>
+<path d="M 690,380 H 620" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="643.2" y="359" width="23.6" height="12" rx="2" fill="#f5f5f5"/>
+<text x="655" y="368" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">YES</text>
+<path d="M 770,420 V 460" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+<rect x="782" y="436" width="18.4" height="12" rx="2" fill="#f5f5f5"/>
+<text x="782" y="445" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">NO</text>
+<path d="M 560,400 V 477 Q 560,485 552,485 H 440" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M 660,505 H 440" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="40" y="90" width="170" height="50" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="90" width="170" height="50" rx="6" fill="#4f5d75" fill-opacity="0.10" stroke="#7a8399" stroke-width="1"/>
+<rect x="48" y="96" width="27" height="12" rx="2" fill="none" stroke="#7a8399" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="61.5" y="105" fill="#7a8399" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">APP</text>
+<text x="125.0" y="113.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">getDb()</text>
+<text x="125.0" y="128.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">readEnv().databasePath</text>
+<rect x="260" y="90" width="180" height="50" rx="6" fill="#f5f5f5"/>
+<rect x="260" y="90" width="180" height="50" rx="6" fill="#4f5d75" fill-opacity="0.10" stroke="#7a8399" stroke-width="1"/>
+<rect x="268" y="96" width="32" height="12" rx="2" fill="none" stroke="#7a8399" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="284.0" y="105" fill="#7a8399" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">TEST</text>
+<text x="350.0" y="113.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">createTestDb()</text>
+<text x="350.0" y="128.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">tmpdir; close() removes it</text>
+<rect x="40" y="220" width="180" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="220" width="180" height="60" rx="6" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
+<rect x="48" y="226" width="32" height="12" rx="2" fill="none" stroke="#eb6c36" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="64.0" y="235" fill="#eb6c36" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">OPEN</text>
+<text x="130.0" y="248.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">openDatabase(path)</text>
+<text x="130.0" y="263.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">src/lib/db/open.ts</text>
+<rect x="260" y="220" width="160" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="260" y="220" width="160" height="60" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="268" y="226" width="22" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="279.0" y="235" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">FS</text>
+<text x="340.0" y="248.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">ensure directory</text>
+<text x="340.0" y="263.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">mkdirSync recursive</text>
+<rect x="460" y="220" width="180" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="460" y="220" width="180" height="60" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="468" y="226" width="42" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="489.0" y="235" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">PRAGMA</text>
+<text x="550.0" y="248.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">journal_mode = WAL</text>
+<text x="550.0" y="263.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">foreign_keys = ON</text>
+<rect x="680" y="220" width="180" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="680" y="220" width="180" height="60" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="688" y="226" width="42" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="709.0" y="235" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LEDGER</text>
+<text x="770.0" y="248.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">applyMigrations</text>
+<text x="770.0" y="263.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">schema_migrations</text>
+<polygon points="770,340 850,380 770,420 690,380" fill="#f5f5f5"/>
+<polygon points="770,340 850,380 770,420 690,380" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<text x="770" y="377" fill="#2d3142" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">version</text>
+<text x="770" y="390" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">already applied?</text>
+<rect x="500" y="360" width="120" height="40" rx="6" fill="#f5f5f5"/>
+<rect x="500" y="360" width="120" height="40" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<text x="560.0" y="382.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">skip</text>
+<rect x="660" y="460" width="220" height="70" rx="6" fill="#f5f5f5"/>
+<rect x="660" y="460" width="220" height="70" rx="6" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
+<rect x="668" y="466" width="22" height="12" rx="2" fill="none" stroke="#eb6c36" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="679.0" y="475" fill="#eb6c36" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">TX</text>
+<text x="770.0" y="493.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">one transaction</text>
+<text x="770.0" y="508.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">BEGIN, sql, ledger row, COMMIT</text>
+<text x="770" y="519" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">ROLLBACK on error</text>
+<rect x="260" y="470" width="180" height="50" rx="6" fill="#f5f5f5"/>
+<rect x="260" y="470" width="180" height="50" rx="6" fill="#2d3142" fill-opacity="0.05" stroke="#4f5d75" stroke-width="1"/>
+<rect x="268" y="476" width="27" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="281.5" y="485" fill="#4f5d75" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">OUT</text>
+<text x="350.0" y="493.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">DatabaseSync handle</text>
+<text x="350.0" y="508.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">returned to the caller</text>
+  <line x1="30" y1="572" x2="930" y2="572" stroke="#2d3142" stroke-opacity="0.10" stroke-width="0.8"/>
+  <text x="30" y="590" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+  <line x1="110" y1="586" x2="140" y2="586" stroke="#4f5d75" stroke-width="1.2"/>
+  <text x="148" y="589" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">CALL / STEP</text>
+  <line x1="250" y1="586" x2="280" y2="586" stroke="#eb6c36" stroke-width="1.2"/>
+  <text x="288" y="589" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">THE PATH THAT WRITES</text>
+  <rect x="440" y="580" width="30" height="12" rx="2" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
+  <text x="478" y="589" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">FOCAL: THE ONE DOOR, AND THE TRANSACTION</text>
+</svg>
