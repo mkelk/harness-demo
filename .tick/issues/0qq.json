@@ -1,0 +1,17 @@
+{
+  "id": "0qq",
+  "title": "Shared TaskFields with due date and priority on both forms",
+  "description": "Source of truth: docs/thoughts/2026-09-17-increment-02-organise.md → 'Task fields' (without the List row: that is epic 2), 'Validation messages'. The domain (migration 0002, Priority, parseDueOn, parsePriority, PRIORITY_LABELS, parseTaskInput with dueOn/priority, submittedValues) exists on this branch. Read src/app/components/add-task-form.tsx, edit-task-form.tsx and their tests, src/app/actions.ts, src/app/tasks/[id]/edit/actions.ts.\nDeliver:\n- src/app/components/task-fields.tsx (client-safe, no server imports): `TaskFields({ idPrefix, values, errors })` rendering the four labelled controls: Title (text), Notes (textarea), Due (`\u003cinput type=\"date\" name=\"dueOn\"\u003e`, label \"Due\"), Priority (`\u003cselect name=\"priority\"\u003e` with options value 1 \"High\", 2 \"Normal\", 3 \"Low\", default \"2\"; labels from PRIORITY_LABELS), each with a `\u003cp role=\"alert\"\u003e` for its error. Values: `{ title, notes, dueOn, priority }` as strings.\n- add-task-form.tsx and edit-task-form.tsx render TaskFields instead of their own markup (edit prefilled from state.values ?? task, with task.dueOn ?? \"\" and String(task.priority)). Actions: state.values now carry dueOn and priority strings (submittedValues already returns them); nothing else changes.\n- Component tests: task-fields.test.tsx (renders the four labels and the three priority options; shows an error alert per field when errors given); update add/edit form tests as needed (prefill of due and priority on edit).\n- Docs: how/tasks.md key entry points gain `src/app/components/task-fields.tsx` → `TaskFields`; mechanism mentions the shared component. Refresh _overview.md's date line.\nExisting e2e (tasks.spec.ts) must keep passing post-merge: the added fields are optional/defaulted.\nFiles likely touched: src/app/components/task-fields.tsx (new) + test, add-task-form.tsx, edit-task-form.tsx and their tests, docs/current/how/tasks.md, docs/current/_overview.md.\nRun: pnpm typecheck \u0026\u0026 pnpm lint \u0026\u0026 pnpm test \u0026\u0026 pnpm docs:check (only the stale data-model stamp may fail)",
+  "status": "open",
+  "priority": 2,
+  "type": "task",
+  "owner": "morten@elk.dk",
+  "blocked_by": [
+    "1ti"
+  ],
+  "parent": "9jr",
+  "acceptance_criteria": "In-worktree gates pass (stale data-model stamp excepted); both forms render TaskFields with Due and Priority; component tests cover the fields and errors.",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T13:44:03.877508198Z",
+  "updated_at": "2026-09-17T13:44:03.877508198Z"
+}

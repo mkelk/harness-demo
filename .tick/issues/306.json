@@ -1,0 +1,17 @@
+{
+  "id": "306",
+  "title": "Close out Due dates and priority: run epic retro, then flesh out Lists and filtering into ticks",
+  "description": "Epic-close retro per the ticks skill and .tick/config.md → At epic close-out (ia-cycles report, history, _overview, living-docs audit rendering scheduling and re-rendering data-model, tag 02-ngm.due-dates-and-priority), then plan epic isl including its EPIC-SKELETON.",
+  "status": "open",
+  "priority": 2,
+  "type": "task",
+  "owner": "morten@elk.dk",
+  "blocked_by": [
+    "58o"
+  ],
+  "parent": "9jr",
+  "role": "closeout",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T13:44:03.924288033Z",
+  "updated_at": "2026-09-17T13:44:03.924288033Z"
+}

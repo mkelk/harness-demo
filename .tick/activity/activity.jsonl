@@ -58,3 +58,8 @@
 {"ts":"2026-09-17T13:42:29.765530247Z","tick":"9jr","action":"create","actor":"claude:orchestrator","epic":"2xs","data":{"priority":2,"title":"Due dates and priority","type":"epic"}}
 {"ts":"2026-09-17T13:42:29.779889863Z","tick":"isl","action":"create","actor":"claude:orchestrator","epic":"2xs","data":{"priority":2,"title":"Lists and filtering","type":"epic"}}
 {"ts":"2026-09-17T13:42:29.81518532Z","tick":"2xs","action":"note","actor":"claude:orchestrator","data":{"note":"2026-09-17 15:42 - base-branch: 2026-09-17-increment-02 (project ticks cannot carry --base-branch in tk 0.29)","title":"Organise"}}
+{"ts":"2026-09-17T13:44:03.861052898Z","tick":"1ti","action":"create","actor":"claude:orchestrator","epic":"9jr","data":{"priority":2,"title":"Due date and priority in the domain: migration 0002, validation, ordering, filters","type":"task"}}
+{"ts":"2026-09-17T13:44:03.878268114Z","tick":"0qq","action":"create","actor":"claude:orchestrator","epic":"9jr","data":{"priority":2,"title":"Shared TaskFields with due date and priority on both forms","type":"task"}}
+{"ts":"2026-09-17T13:44:03.89585588Z","tick":"irc","action":"create","actor":"claude:orchestrator","epic":"9jr","data":{"priority":2,"title":"Badges, overdue mark and filter bar on the list page","type":"task"}}
+{"ts":"2026-09-17T13:44:03.910257254Z","tick":"58o","action":"create","actor":"claude:orchestrator","epic":"9jr","data":{"priority":2,"title":"Final review of Due dates and priority diff","type":"task"}}
+{"ts":"2026-09-17T13:44:03.924706548Z","tick":"306","action":"create","actor":"claude:orchestrator","epic":"9jr","data":{"priority":2,"title":"Close out Due dates and priority: run epic retro, then flesh out Lists and filtering into ticks","type":"task"}}
