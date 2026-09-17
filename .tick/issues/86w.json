@@ -3,7 +3,7 @@
   "title": "Task input validation",
   "description": "Source of truth: docs/thoughts/2026-09-17-increment-01-task-basics.md → 'Validation' table and 'Domain → validate.ts'. src/lib/tasks/types.ts (Task, TaskInput) exists on this branch: import TaskInput from it.\n\nDeliver src/lib/tasks/validate.ts exporting:\n  export type TaskInputErrors = { title?: string; notes?: string };\n  export type ParseResult = { ok: true; value: TaskInput } | { ok: false; errors: TaskInputErrors };\n  export const TITLE_MAX = 200; export const NOTES_MAX = 2000;\n  export function parseTaskInput(raw: { title?: unknown; notes?: unknown }): ParseResult\nRules: non-string values are treated as \"\"; both fields are trimmed; title must be 1..200 chars after trimming (\"Title is required.\" when empty, \"Title must be 200 characters or fewer.\" when longer); notes 0..2000 (\"Notes must be 2000 characters or fewer.\"). Report every failing field at once. Also export `formDataToRaw(formData: FormData): { title: unknown; notes: unknown }` returning formData.get(\"title\") and formData.get(\"notes\") so server actions have one way in.\n\nTest cases (test-first) in src/lib/tasks/validate.test.ts (vitest node project):\n- \"  Buy milk  \" → ok, value.title === \"Buy milk\", value.notes === \"\"\n- \"\" → errors.title === \"Title is required.\"\n- \"   \" → errors.title === \"Title is required.\"\n- 201 chars → errors.title === \"Title must be 200 characters or fewer.\"; exactly 200 chars → ok\n- notes of 2001 chars → errors.notes === \"Notes must be 2000 characters or fewer.\"; exactly 2000 → ok\n- notes undefined → ok with value.notes === \"\"\n- title 42 (a number) → errors.title === \"Title is required.\"\n- both invalid → both errors present\n- formDataToRaw(new FormData with title and notes appended) → the two strings; missing keys → null values which parseTaskInput treats as empty\n\nFiles likely touched: src/lib/tasks/validate.ts (new), src/lib/tasks/validate.test.ts (new). Nothing else.\nRun: pnpm typecheck \u0026\u0026 pnpm lint \u0026\u0026 pnpm test",
   "notes": "2026-09-17 15:02 - runner-state: runner=claude branch=tick/azj/86w worktree=../.ticks-worktrees/86w base=0fd4532cae17315051e6d6d6bdfe9494dde1931d mode=parallel-wave tier=balanced",
-  "status": "in_progress",
+  "status": "closed",
   "priority": 2,
   "type": "task",
   "owner": "morten@elk.dk",
@@ -14,6 +14,7 @@
   "acceptance_criteria": "pnpm typecheck, pnpm lint and pnpm test pass in the worktree with every validate.test.ts case green; parseTaskInput, formDataToRaw, TITLE_MAX and NOTES_MAX are exported; no file outside src/lib/tasks/validate*.ts changed.",
   "created_by": "morten@elk.dk",
   "created_at": "2026-09-17T12:57:07.630003564Z",
-  "updated_at": "2026-09-17T13:02:46.682315771Z",
-  "started_at": "2026-09-17T13:02:46.658860385Z"
+  "updated_at": "2026-09-17T13:07:10.558228597Z",
+  "closed_at": "2026-09-17T13:07:10.558228597Z",
+  "closed_reason": "Completed: src/lib/tasks/validate.ts (parseTaskInput, formDataToRaw, TITLE_MAX, NOTES_MAX) with 11 unit tests"
 }
