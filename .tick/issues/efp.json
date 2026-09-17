@@ -2,7 +2,7 @@
   "id": "efp",
   "title": "Close out Task list: run epic retro, then reach the project checkpoint",
   "description": "Epic-close retro per the ticks skill and .tick/config.md → At epic close-out (ia-cycles report, history entry, _overview update, living-docs audit with render + stamp of task-flow, tag 01-rxx.task-list). Then the increment has no further epics: apply At project checkpoint (completion.md, stop; never merge to main).",
-  "status": "open",
+  "status": "in_progress",
   "priority": 2,
   "type": "task",
   "owner": "morten@elk.dk",
@@ -13,5 +13,6 @@
   "role": "closeout",
   "created_by": "morten@elk.dk",
   "created_at": "2026-09-17T13:17:48.13510914Z",
-  "updated_at": "2026-09-17T13:17:48.13510914Z"
+  "updated_at": "2026-09-17T13:38:52.337103114Z",
+  "started_at": "2026-09-17T13:38:52.33710118Z"
 }
