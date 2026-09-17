@@ -30,4 +30,4 @@ Mermaid block; the procedure is `_documentation_principles.md` → **Diagrams fi
 | `persistence`  | `how/persistence.md`  | `openDatabase`: ensure directory, PRAGMAs, `applyMigrations` against `schema_migrations`, the handle; `getDb` and `createTestDb` as callers |
 | `data-model`   | `data-model.md`       | ER view of `tasks` and `schema_migrations` with their columns and constraints                                                               |
 
-**Last documentation update:** 2026-09-17 (tick w74, persistence foundation: how/persistence, data-model).
+**Last documentation update:** 2026-09-17 (epic Persistence foundation closed: how/persistence and data-model added and rendered; testing and architecture pages corrected).
