@@ -26,8 +26,8 @@ the orchestrator runs it on the integrated tree before a wave closes.
 
 ## Writing a test
 
-- Unit and component tests sit next to the code they test (`src/lib/tasks.test.ts`
-  beside `src/lib/tasks.ts`).
+- Unit and component tests sit next to the code they test (`src/lib/tasks/validate.test.ts`
+  beside `src/lib/tasks/validate.ts`).
 - Integration tests open a fresh database with `createTestDb()` from `src/lib/db/`: a
   temp file per test, migrated, removed by `close()`. Never `data/dev.db`.
 - E2E tests use `page.getByRole` and visible text, not CSS selectors, and each test

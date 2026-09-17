@@ -46,7 +46,7 @@ export function applyMigrations(
       record.run(migration.version, migration.name, new Date().toISOString());
       db.exec("COMMIT");
     } catch (error) {
-      db.exec("ROLLBACK");
+      if (db.isTransaction) db.exec("ROLLBACK");
       throw error;
     }
     count++;

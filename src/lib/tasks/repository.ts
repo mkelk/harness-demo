@@ -1,9 +1,5 @@
-import type { TestDb } from "@/lib/db";
+import type { DatabaseSync } from "@/lib/db";
 import type { Task, TaskInput } from "./types";
-
-/** The `node:sqlite` handle type, re-derived to avoid importing `node:sqlite`
- * outside `src/lib/db/` (see `scripts/check-rules.test.ts`). */
-type DatabaseSync = TestDb["db"];
 
 type TaskRow = {
   id: number;
