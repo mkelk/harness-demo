@@ -1,0 +1,17 @@
+{
+  "id": "xgu",
+  "title": "Edit page for a task",
+  "description": "Source of truth: docs/thoughts/2026-09-17-increment-01-task-basics.md → 'On screen → /tasks/\u003cid\u003e/edit' and 'Definitions of done → Epic 2'. The list page, actions and how/tasks.md exist from the previous ticks in this chain: read them and reuse the form patterns.\n\nDeliver:\n- src/app/tasks/[id]/edit/page.tsx (server component; in Next 16 `params` is a Promise: `const { id } = await params`): parse id as a positive integer, `getTask(getDb(), id)` and `notFound()` when null or NaN; render `\u003cEditTaskForm task={task} /\u003e`.\n- src/app/tasks/[id]/edit/actions.ts (`\"use server\"`): `saveTask(prevState: SaveTaskState, formData: FormData)`: id from a hidden input; parse via formDataToRaw/parseTaskInput; on error return { errors, values }; on success updateTask(getDb(), id, value) (notFound() if it returns null), revalidatePath(\"/\"), then `redirect(\"/\")` (redirect throws; call it outside try/catch).\n- src/app/components/edit-task-form.tsx (`\"use client\"`): useActionState(saveTask, {}); prefilled inputs (defaultValue from state.values ?? task), labels \"Title\" and \"Notes\", hidden id, a \"Save\" button and a \"Cancel\" link to \"/\"; errors with role=\"alert\".\n- e2e/tasks.spec.ts: add \"edits a task's title and notes\" (create 'Buy milk' via the form, click its Edit link, change title to 'Buy oat milk' and notes to '2 litres', Save, assert the list shows both), \"rejects an empty title on the edit page and changes nothing\" (assert error text, then go back to / and the old title is still there), \"returns 404 for an unknown task\" (`page.goto(\"/tasks/999999/edit\")` → response status 404). The e2e file stays serial; ensure the last test does not depend on task state.\n- src/app/components/edit-task-form.test.tsx (jsdom): renders prefilled values from the task prop and the Save button; error state renders the alert (mock the actions module).\n- Docs: extend docs/current/how/tasks.md with the edit route (key entry points: page, saveTask, EditTaskForm; the redirect-after-save fact; the 404 rule), and the failure-modes table with \"redirect inside try/catch swallows the redirect\". Refresh _overview.md's last-update line. Update docs/current/README.md \"What it is\" paragraph to mention edit if it lists capabilities.\nFiles likely touched: src/app/tasks/[id]/edit/page.tsx (new), src/app/tasks/[id]/edit/actions.ts (new), src/app/components/edit-task-form.tsx (new) + test, e2e/tasks.spec.ts, docs/current/how/tasks.md, docs/current/_overview.md, docs/current/README.md.\nRun in-worktree: pnpm typecheck \u0026\u0026 pnpm lint \u0026\u0026 pnpm test \u0026\u0026 pnpm docs:check",
+  "status": "open",
+  "priority": 2,
+  "type": "task",
+  "owner": "morten@elk.dk",
+  "blocked_by": [
+    "76z"
+  ],
+  "parent": "5qb",
+  "acceptance_criteria": "In-worktree gates pass. Post-merge: pnpm test:e2e passes all nine tasks.spec.ts tests plus smoke; /tasks/999999/edit returns 404. how/tasks.md documents the edit route.",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T13:17:48.107792101Z",
+  "updated_at": "2026-09-17T13:17:48.107792101Z"
+}
