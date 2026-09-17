@@ -71,20 +71,43 @@ up front.
 - Implementers run in isolated worktrees, commit as `tick <id>: <summary>`, and never
   touch `.tick/`; the orchestrator owns tick state and integrates wave by wave.
 
-### Rules for testing
+### Rules for testing, and where they are enforced
 
-Set in `.tick/config.md` → `## Testing` and explained in
-[`docs/current/standards/testing-strategy.md`](docs/current/standards/testing-strategy.md):
+dmtix itself enforces nothing: it is the door. The ticks engine and `.tick/config.md` do the
+enforcing, at four points of every run. A missing or weak test is caught at the first point
+it reaches, never at the end.
 
-- Five tiers: unit, component, integration, guards (Vitest) and e2e (Playwright).
-- **Venues.** The engine's inferred profile routes unit, component, integration and
-  guards **in-worktree** (implementers run them before reporting) and e2e
-  **post-merge** (it binds a port and writes a real database file, so the orchestrator
-  runs it once on the integrated tree before a wave closes).
-- Test-first, real database in a temp file per test, coverage floor on `src/lib/**`,
-  no threshold lowered inside a tick, sibling tests fixed in the same tick.
-- Acceptance is evidence: `.tick/config.md` → `## Acceptance Evidence` maps each
-  definition-of-done item to exactly one command that the close-out may run.
+| Point in the run    | What is checked                                                                                                                                                                                                                                                                                                                                                                  | Where the rule lives                                                          |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **Tick creation**   | The engine's Definition of Ready refuses a tick without spelled-out test cases and a test command. Every tick here lists inputs to expected outputs and ends with `Run: pnpm typecheck && pnpm lint && pnpm test && pnpm docs:check`.                                                                                                                                            | ticks skill, `references/tick-patterns.md`                                    |
+| **In the worktree** | The implementer writes the failing test first and may only report `DONE` with the in-worktree tiers green. No lowered threshold, no skipped test, no `\|\| true`; a behaviour change fixes every sibling test it breaks.                                                                                                                                                         | `.tick/config.md` → `## Testing`, `## Rules`; the implementer prompt          |
+| **Post-merge gate** | The orchestrator merges a wave, then runs the whole suite plus the post-merge tiers (e2e, build) on the integrated tree. Ticks close only after that passes; a red gate keeps them open. This caught the one defect implementers could not see (Next's route announcer sharing `role="alert"`).                                                                                  | ticks skill loop, `.tick/profile.md` (venues)                                 |
+| **Close-out**       | The epic's definition of done is verified item by item using only the commands under `## Acceptance Evidence` (A1 `pnpm check`, A2 `pnpm test:e2e`, A3 `pnpm docs:check --strict`, A4 `pnpm test:coverage`). Fails closed: a command not listed there cannot count as evidence. The frontier review also hunts for tests that cannot fail; it found some in three of four epics. | `.tick/config.md` → `## Acceptance Evidence`, `## Closeout Evidence Commands` |
+
+The tiers and their venues:
+
+| Tier                                 | Runner       | Venue                         | Why                                             |
+| ------------------------------------ | ------------ | ----------------------------- | ----------------------------------------------- |
+| unit, component, integration, guards | Vitest       | in-worktree, per tick         | pure, or a temp SQLite file per test            |
+| e2e                                  | Playwright   | post-merge, orchestrator only | binds port 3100 and writes a real database file |
+| build                                | `next build` | post-merge                    | slow, writes `.next/`                           |
+
+Venues are inferred by the engine into `.tick/profile.md` at run start, on positive evidence
+of isolation only (`createTestDb()` makes a temp file per test); anything that touches a
+shared resource is routed post-merge. Coverage has a floor on `src/lib/**` (80 / 70 / 80 / 80)
+that no tick may lower.
+
+To run the same gates by hand:
+
+```bash
+pnpm check           # typecheck, lint, all Vitest tiers, docs:check, build
+pnpm test:e2e        # Playwright, own server on :3100, throwaway data/e2e-<run>.db
+pnpm test:unit       # or test:component, test:integration, test:coverage
+```
+
+Details: [`docs/current/testing.md`](docs/current/testing.md) (commands, tiers, failure
+modes) and [`docs/current/standards/testing-strategy.md`](docs/current/standards/testing-strategy.md)
+(what each tier proves, the rules, the guard tests).
 
 ### Rules for automatic documentation
 
