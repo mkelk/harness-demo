@@ -2,7 +2,7 @@
   "id": "5qb",
   "title": "Task list",
   "description": "The task list page at / (add form, open tasks newest first with done checkbox, edit link and delete button, Done section with reopen, empty state, counts in headings) and the edit page at /tasks/[id]/edit (prefilled form, Save redirects to /, Cancel link, validation errors re-render, unknown id is notFound()). Server actions in src/app/actions.ts and src/app/tasks/[id]/edit/actions.ts call one repository function each and revalidatePath. Client components add-task-form, task-list, edit-task-form with useActionState. e2e/tasks.spec.ts. docs/current/how/tasks.md (diagram: task-flow), and setup.md/README.md updated where facts changed. Expected shape: one warm-chain of three ticks (list + add → done/reopen/delete → edit). Source of truth: docs/thoughts/2026-09-17-increment-01-task-basics.md sections 'On screen', 'App', 'Documentation added' and 'Definitions of done → Epic 2'.",
-  "status": "open",
+  "status": "closed",
   "priority": 2,
   "type": "epic",
   "owner": "morten@elk.dk",
@@ -14,5 +14,7 @@
   "base_branch": "2026-09-17-increment-01",
   "created_by": "morten@elk.dk",
   "created_at": "2026-09-17T12:54:37.865641777Z",
-  "updated_at": "2026-09-17T12:54:37.893268642Z"
+  "updated_at": "2026-09-17T13:39:40.602530396Z",
+  "closed_at": "2026-09-17T13:39:40.602530396Z",
+  "closed_reason": "Completed: task list page, done/reopen/delete, edit page, 10 e2e + 55 vitest green; retro in ia-cycles/task-list.md"
 }
