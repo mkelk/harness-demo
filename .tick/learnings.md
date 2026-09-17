@@ -51,3 +51,23 @@
 **Problem:** Three private copies of the same id-parsing rule appeared across two action files and a page.
 **Cause:** Each chain tick added what it needed locally.
 **Rule:** Any parsing of user input, including ids from hidden fields, lives in `src/lib/tasks/validate.ts` with unit tests; server actions only import it.
+
+## Filters and query parameters
+
+**Problem:** A search for `100%` matched every task.
+**Cause:** `LIKE` treats `%` and `_` as wildcards; the search term was bound unescaped.
+**Rule:** User text reaching `LIKE` goes through `escapeLike()` in the repository and the query carries `ESCAPE '\'`. Test with a title containing `%` and one containing `_`.
+
+**Problem:** `getByLabel("Due")` in Playwright matched the "Delete: …" buttons.
+**Cause:** Label lookup is a substring match by default.
+**Rule:** Use `getByLabel(name, { exact: true })` whenever another accessible name contains the word.
+
+**Problem:** A failing mid-flow serial e2e test left rows behind and broke the next spec file.
+**Cause:** Cleanup lived in the last test of the serial group, which Playwright skips after a failure.
+**Rule:** Per-file cleanup goes in `test.afterAll` with its own page; spec files never assume another file's state.
+
+## Server actions
+
+**Problem:** A list created from the sidebar did not refresh `/lists/<id>` pages until the next request.
+**Cause:** Each action revalidated only the paths its author had in mind.
+**Rule:** Every write action calls `revalidateTaskPages()` from `src/app/revalidate.ts`; a new route that shows tasks or lists is added there, not in the actions. A `"use server"` file cannot export a sync helper, so shared helpers live in a plain module.

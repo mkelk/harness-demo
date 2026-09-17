@@ -1,19 +1,22 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
+import { revalidateTaskPages } from "@/app/revalidate";
 import { getDb } from "@/lib/db";
+import { listLists } from "@/lib/lists/repository";
 import { updateTask } from "@/lib/tasks/repository";
 import {
   formDataToRaw,
   parseTaskId,
   parseTaskInput,
   submittedValues,
+  type TaskInputErrors,
 } from "@/lib/tasks/validate";
 
 export type SaveTaskState = {
-  errors?: { title?: string; notes?: string };
-  values?: { title: string; notes: string };
+  errors?: TaskInputErrors;
+  /** The submitted strings (`dueOn` and `priority` included), kept on error. */
+  values?: ReturnType<typeof submittedValues>;
 };
 
 /**
@@ -28,13 +31,16 @@ export async function saveTask(
   const id = parseTaskId(formData.get("id"));
   if (id === null) notFound();
 
-  const parsed = parseTaskInput(formDataToRaw(formData));
+  const db = getDb();
+  // The List select must name an existing list (or "" for No list).
+  const listIds = listLists(db).map((list) => list.id);
+  const parsed = parseTaskInput(formDataToRaw(formData), { listIds });
   if (!parsed.ok) {
     return { errors: parsed.errors, values: submittedValues(formData) };
   }
-  const updated = updateTask(getDb(), id, parsed.value);
+  const updated = updateTask(db, id, parsed.value);
   if (updated === null) notFound();
 
-  revalidatePath("/");
+  revalidateTaskPages();
   redirect("/");
 }

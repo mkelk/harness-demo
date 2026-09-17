@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { removeTask, toggleTask } from "@/app/actions";
+import { isOverdue } from "@/lib/tasks/repository";
 import type { Task } from "@/lib/tasks/types";
+import { PRIORITY_LABELS } from "@/lib/tasks/validate";
+import type { Show } from "./filter-bar";
 import { TaskCheckbox } from "./task-checkbox";
+import type { ListOption } from "./task-fields";
 
 function firstLine(notes: string): string {
   return notes.split(/\r?\n/, 1)[0] ?? "";
@@ -37,8 +41,92 @@ function ToggleForm({ task, done }: { task: Task; done: boolean }) {
   );
 }
 
-export function TaskList({ open, done }: { open: Task[]; done: Task[] }) {
-  if (open.length === 0 && done.length === 0) {
+/**
+ * The marks after a title: a High or Low badge (Normal shows nothing), the
+ * due date, Overdue for an open task due before `today`, and the list name
+ * linked to `/lists/<id>` when `listName` is given.
+ */
+function TaskMarks({
+  task,
+  today,
+  listName,
+}: {
+  task: Task;
+  today: string;
+  listName: string | undefined;
+}) {
+  return (
+    <>
+      {task.priority !== 2 ? (
+        <span
+          className={`badge rounded px-1.5 text-xs ${
+            task.priority === 1
+              ? "bg-red-100 text-red-800"
+              : "bg-zinc-200 text-zinc-700"
+          }`}
+        >
+          {PRIORITY_LABELS[task.priority]}
+        </span>
+      ) : null}
+      {task.dueOn ? (
+        <span className="text-xs text-zinc-600">Due {task.dueOn}</span>
+      ) : null}
+      {isOverdue(task, today) ? (
+        <span className="overdue text-xs font-semibold text-red-700">
+          Overdue
+        </span>
+      ) : null}
+      {listName !== undefined && task.listId !== null ? (
+        <Link
+          href={`/lists/${task.listId}`}
+          className="text-xs text-blue-700 underline"
+        >
+          {listName}
+        </Link>
+      ) : null}
+    </>
+  );
+}
+
+/**
+ * The Open and Done sections. `show` is the normalised query value:
+ * `"open"` renders Open only, `"done"` Done only, `"all"` both (a `Done (0)`
+ * heading included); `undefined` (no query) renders Open and, only when it has
+ * rows, Done, which is what the page did before the filter bar existed. The
+ * empty-state paragraph appears only when `show` is `undefined` or `"all"`,
+ * without a search and without rows; `"open"` and `"done"` always render
+ * their heading with a count, `Open (0)` or `Done (0)` included. `lists`
+ * (given on `/`, not on a list page) lets a row link its list by name.
+ */
+export function TaskList({
+  open,
+  done,
+  show,
+  q,
+  today,
+  lists,
+}: {
+  open: Task[];
+  done: Task[];
+  show: Show | undefined;
+  q: string;
+  today: string;
+  lists?: ListOption[];
+}) {
+  const listNames = new Map(lists?.map((list) => [list.id, list.name]));
+  const listName = (task: Task) =>
+    task.listId === null ? undefined : listNames.get(task.listId);
+  const showOpen = show !== "done";
+  const showDone =
+    show === "done" ||
+    show === "all" ||
+    (show === undefined && done.length > 0);
+  const showEmptyState =
+    (show === undefined || show === "all") &&
+    open.length === 0 &&
+    done.length === 0 &&
+    q.length === 0;
+  if (showEmptyState) {
     return (
       <p className="mt-6 text-zinc-600">
         No tasks yet. Add the first one above.
@@ -47,37 +135,46 @@ export function TaskList({ open, done }: { open: Task[]; done: Task[] }) {
   }
   return (
     <div className="mt-6 flex flex-col gap-6">
-      <section aria-labelledby="open-heading">
-        <h2 id="open-heading" className="text-lg font-semibold">
-          Open ({open.length})
-        </h2>
-        <ul aria-label="Open tasks" className="mt-2 flex flex-col gap-2">
-          {open.map((task) => (
-            <li
-              key={task.id}
-              className="flex items-start gap-3 rounded border border-zinc-200 bg-white px-3 py-2"
-            >
-              <ToggleForm task={task} done={false} />
-              <div className="flex-1">
-                <div>{task.title}</div>
-                {task.notes ? (
-                  <div className="text-sm text-zinc-500">
-                    {firstLine(task.notes)}
-                  </div>
-                ) : null}
-              </div>
-              <Link
-                href={`/tasks/${task.id}/edit`}
-                className="text-sm text-blue-700 underline"
+      {showOpen ? (
+        <section aria-labelledby="open-heading">
+          <h2 id="open-heading" className="text-lg font-semibold">
+            Open ({open.length})
+          </h2>
+          <ul aria-label="Open tasks" className="mt-2 flex flex-col gap-2">
+            {open.map((task) => (
+              <li
+                key={task.id}
+                className="flex items-start gap-3 rounded border border-zinc-200 bg-white px-3 py-2"
               >
-                Edit
-              </Link>
-              <DeleteButton task={task} />
-            </li>
-          ))}
-        </ul>
-      </section>
-      {done.length > 0 ? (
+                <ToggleForm task={task} done={false} />
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span>{task.title}</span>
+                    <TaskMarks
+                      task={task}
+                      today={today}
+                      listName={listName(task)}
+                    />
+                  </div>
+                  {task.notes ? (
+                    <div className="text-sm text-zinc-500">
+                      {firstLine(task.notes)}
+                    </div>
+                  ) : null}
+                </div>
+                <Link
+                  href={`/tasks/${task.id}/edit`}
+                  className="text-sm text-blue-700 underline"
+                >
+                  Edit
+                </Link>
+                <DeleteButton task={task} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {showDone ? (
         <section aria-labelledby="done-heading">
           <h2 id="done-heading" className="text-lg font-semibold">
             Done ({done.length})
@@ -89,8 +186,15 @@ export function TaskList({ open, done }: { open: Task[]; done: Task[] }) {
                 className="flex items-start gap-3 rounded border border-zinc-200 bg-zinc-100 px-3 py-2"
               >
                 <ToggleForm task={task} done={true} />
-                <div className="flex-1 text-zinc-500 line-through">
-                  {task.title}
+                <div className="flex flex-1 flex-wrap items-center gap-2">
+                  <span className="text-zinc-500 line-through">
+                    {task.title}
+                  </span>
+                  <TaskMarks
+                    task={task}
+                    today={today}
+                    listName={listName(task)}
+                  />
                 </div>
                 <DeleteButton task={task} />
               </li>

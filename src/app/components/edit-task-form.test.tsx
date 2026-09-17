@@ -7,10 +7,18 @@ import { EditTaskFormView } from "./edit-task-form";
 // mocked so the component file can be imported without a database.
 vi.mock("@/app/tasks/[id]/edit/actions", () => ({ saveTask: vi.fn() }));
 
+const lists = [
+  { id: 1, name: "Groceries" },
+  { id: 2, name: "Work" },
+];
+
 const task: Task = {
   id: 7,
   title: "Buy milk",
   notes: "Semi-skimmed",
+  dueOn: "2026-09-30",
+  priority: 1,
+  listId: null,
   doneAt: null,
   createdAt: "2026-09-17T10:00:00.000Z",
   updatedAt: "2026-09-17T10:00:00.000Z",
@@ -18,9 +26,19 @@ const task: Task = {
 
 describe("EditTaskFormView", () => {
   it("prefills Title and Notes from the task and renders Save and Cancel", () => {
-    render(<EditTaskFormView task={task} state={{}} action={vi.fn()} />);
+    render(
+      <EditTaskFormView
+        task={task}
+        lists={lists}
+        state={{}}
+        action={vi.fn()}
+      />,
+    );
     expect(screen.getByLabelText("Title")).toHaveValue("Buy milk");
     expect(screen.getByLabelText("Notes")).toHaveValue("Semi-skimmed");
+    expect(screen.getByLabelText("Due")).toHaveValue("2026-09-30");
+    expect(screen.getByLabelText("Priority")).toHaveValue("1");
+    expect(screen.getByLabelText("List", { exact: true })).toHaveValue("");
     expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cancel" })).toHaveAttribute(
       "href",
@@ -33,9 +51,16 @@ describe("EditTaskFormView", () => {
     render(
       <EditTaskFormView
         task={task}
+        lists={lists}
         state={{
           errors: { title: "Title is required." },
-          values: { title: "", notes: "changed notes" },
+          values: {
+            title: "",
+            notes: "changed notes",
+            dueOn: "",
+            priority: "3",
+            listId: "",
+          },
         }}
         action={vi.fn()}
       />,
@@ -43,5 +68,32 @@ describe("EditTaskFormView", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Title is required.");
     expect(screen.getByLabelText("Title")).toHaveValue("");
     expect(screen.getByLabelText("Notes")).toHaveValue("changed notes");
+    expect(screen.getByLabelText("Due")).toHaveValue("");
+    expect(screen.getByLabelText("Priority")).toHaveValue("3");
+  });
+
+  it("shows an undated Normal task with an empty Due and Normal selected", () => {
+    render(
+      <EditTaskFormView
+        task={{ ...task, dueOn: null, priority: 2 }}
+        lists={lists}
+        state={{}}
+        action={vi.fn()}
+      />,
+    );
+    expect(screen.getByLabelText("Due")).toHaveValue("");
+    expect(screen.getByLabelText("Priority")).toHaveValue("2");
+  });
+
+  it("selects the task's list in the List select", () => {
+    render(
+      <EditTaskFormView
+        task={{ ...task, listId: 2 }}
+        lists={lists}
+        state={{}}
+        action={vi.fn()}
+      />,
+    );
+    expect(screen.getByLabelText("List", { exact: true })).toHaveValue("2");
   });
 });

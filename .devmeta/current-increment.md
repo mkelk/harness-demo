@@ -1,3 +1,6 @@
 # Current Increment
-**Active:** none — increment 01-rxx shipped 2026-09-17; run /dmtix start for the next
-**Last:** Increment 01-rxx — Task basics, `.devmeta/increments/increment-01-rxx/completion.md`
+
+**Active:** Increment 02-ngm — Organise
+**Overview:** `.devmeta/increments/increment-02-ngm/_overview.md`
+**Roadmap (tk):** project `2xs` → `9jr`, `isl`
+**Status:** AT CHECKPOINT (all epics done; completion.md written; awaiting human review and merge)

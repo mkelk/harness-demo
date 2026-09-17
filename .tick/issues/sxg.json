@@ -1,0 +1,20 @@
+{
+  "id": "sxg",
+  "title": "List select on task forms, list links on the list page, lists e2e",
+  "description": "Source of truth: docs/thoughts/2026-09-17-increment-02-organise.md → 'Task fields' (List row), 'The list page' (list name link on /), 'Definitions of done → Epic 2' (the e2e cases). Sidebar, /lists/[id], TaskPage and the lists actions exist from the previous tick in this chain; read them.\nDeliver:\n- src/app/components/task-fields.tsx: a fifth control, label \"List\", `\u003cselect name=\"listId\"\u003e` with option value \"\" \"No list\" plus one option per list (value id, text name); props gain `lists: { id: number; name: string }[]` and the default comes from values.listId. Both forms pass lists (AddTaskForm gets them from TaskPage; EditTaskForm from the edit page via listLists). The hidden listId input from the previous tick is replaced by the select's default (on /lists/\u003cid\u003e the select defaults to that list). saveTask passes { listIds } to parseTaskInput. Errors for listId render like the others.\n- task-list.tsx: on the unscoped page, a row whose task has a list shows the list name as a link to /lists/\u003cid\u003e (pass `lists` or a name map down; no per-row query).\n- e2e/lists.spec.ts (serial; own titles \"Lists: ...\"; never assumes an empty db; `test.afterAll` deletes what it created: its tasks and its list, via the UI or by navigating and clicking): creating list \"Lists: Groceries\" shows it in the sidebar as \"Lists: Groceries (0)\"; on its /lists/\u003cid\u003e page, adding task \"Lists: milk\" shows it in the list and the sidebar count \"(1)\", and on / the row shows the link \"Lists: Groceries\"; editing the task to List \"No list\" removes the link and the count returns to \"(0)\"; creating \"Lists: Groceries\" again shows \"A list with that name already exists.\"; deleting the list (from its page) lands on / with the task still present and the sidebar without the list; /lists/999999 responds 404.\n- Component tests: task-fields.test.tsx gains the List control cases (options, default from values.listId, error alert).\n- Docs: how/lists.md gains the select and the row link (entry points + mechanism); how/tasks.md's form tables gain the List row; scheduling.md untouched; _overview.md date line; README \"What it is\" mentions lists if it lists capabilities.\nFiles likely touched: src/app/components/task-fields.tsx + test, add-task-form.tsx, edit-task-form.tsx, task-list.tsx, task-page.tsx, src/app/tasks/[id]/edit/{page,actions}.ts(x), src/app/actions.ts, e2e/lists.spec.ts (new), docs/current/how/lists.md, docs/current/how/tasks.md, docs/current/_overview.md, docs/current/README.md.\nRun: pnpm typecheck \u0026\u0026 pnpm lint \u0026\u0026 pnpm test \u0026\u0026 pnpm docs:check (allowed diagram findings as before). Post-merge: all three e2e files must pass.",
+  "notes": "2026-09-17 16:22 - runner-state: runner=claude branch=tick/isl/chain-3e9-sxg worktree=../.ticks-worktrees/chain-isl base=5ab0ab22c3fa7a4d1b9519d6928b1a03ae35bde4 mode=warm-chain(3e9→sxg) tier=strong",
+  "status": "closed",
+  "priority": 2,
+  "type": "task",
+  "owner": "morten@elk.dk",
+  "blocked_by": [
+    "3e9"
+  ],
+  "parent": "isl",
+  "acceptance_criteria": "In-worktree gates pass. Post-merge: pnpm test:e2e green across tasks, scheduling and lists spec files. TaskFields renders the List select on both forms; rows on / link to the list; how/lists.md documents both.",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T14:15:20.985231251Z",
+  "updated_at": "2026-09-17T14:37:19.774050306Z",
+  "closed_at": "2026-09-17T14:37:19.774050306Z",
+  "closed_reason": "Completed: List select in TaskFields on both forms, list links in rows, e2e/lists.spec.ts, how/lists.md; 165 vitest, 21 e2e"
+}

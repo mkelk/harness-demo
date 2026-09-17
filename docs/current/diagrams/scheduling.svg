@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 960 620" role="img" aria-labelledby="scheduling-title scheduling-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="scheduling-title">Scheduling: how due dates and priority order the list</title>
+  <desc id="scheduling-desc">A request to the list page carries show and q query parameters. page.tsx awaits them, computes today as the UTC calendar date, and calls listTasks with the filter. The open list is ordered in three steps: earliest due date first with undated tasks last, then priority high, normal, low, then newest first. Rows render a High or Low badge, the due date, and Overdue when the task is open and its due date is before today. The filter bar's links keep q and its search form keeps show, and each leads back to a new request.</desc>
+  <defs><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+    <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+    <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+  </defs>
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+  <text x="40" y="52" fill="#2d3142" font-size="28" font-family="'Instrument Serif', serif">Scheduling</text>
+  <text x="40" y="74" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">DUE DATE, PRIORITY, OVERDUE, AND THE ORDER OF THE OPEN LIST</text>
+<path d="M 200,140 V 200" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="212" y="164" width="44.4" height="12" rx="2" fill="#f5f5f5"/>
+<text x="212" y="173" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">SHOW, Q</text>
+<path d="M 200,260 V 320" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+<rect x="212" y="284" width="39.2" height="12" rx="2" fill="#f5f5f5"/>
+<text x="212" y="293" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">FILTER</text>
+<path d="M 200,380 V 460" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="212" y="414" width="60.0" height="12" rx="2" fill="#f5f5f5"/>
+<text x="212" y="423" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">OPEN, DONE</text>
+<path d="M 360,350 H 520" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+<rect x="410.0" y="326" width="60.0" height="12" rx="2" fill="#f5f5f5"/>
+<text x="440" y="335" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">OPEN ORDER</text>
+<path d="M 720,370 V 390" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M 720,430 V 450" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M 520,470 H 360" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="404.8" y="446" width="70.4" height="12" rx="2" fill="#f5f5f5"/>
+<text x="440" y="455" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">ORDERED ROWS</text>
+<path d="M 360,215 H 712 Q 720,215 720,207 V 140" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="517.8" y="191" width="44.4" height="12" rx="2" fill="#f5f5f5"/>
+<text x="540" y="200" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">RENDERS</text>
+<path d="M 520,115 H 360" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+<rect x="407.4" y="91" width="65.2" height="12" rx="2" fill="#f5f5f5"/>
+<text x="440" y="100" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">NEW REQUEST</text>
+<path d="M 40,245 H 30 Q 22,245 22,253 V 482 Q 22,490 30,490 H 40" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+<rect x="48" y="531" width="169.20000000000002" height="12" rx="2" fill="#f5f5f5"/>
+<text x="48" y="540" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">TODAY (UTC DATE) → OVERDUE MARK</text>
+<rect x="40" y="90" width="320" height="50" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="90" width="320" height="50" rx="6" fill="#4f5d75" fill-opacity="0.10" stroke="#7a8399" stroke-width="1"/>
+<rect x="48" y="96" width="27" height="12" rx="2" fill="none" stroke="#7a8399" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="61.5" y="105" fill="#7a8399" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">GET</text>
+<text x="200.0" y="114.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">/ ?show=open|done|all &amp;q=word</text>
+<text x="200.0" y="129.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">show missing: both sections, Done only if non-empty</text>
+<rect x="520" y="90" width="400" height="50" rx="6" fill="#f5f5f5"/>
+<rect x="520" y="90" width="400" height="50" rx="6" fill="#4f5d75" fill-opacity="0.10" stroke="#7a8399" stroke-width="1"/>
+<rect x="528" y="96" width="22" height="12" rx="2" fill="none" stroke="#7a8399" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="539.0" y="105" fill="#7a8399" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">UI</text>
+<text x="720.0" y="114.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">FilterBar</text>
+<text x="720.0" y="129.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">links keep q; the search form keeps show</text>
+<rect x="40" y="200" width="320" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="200" width="320" height="60" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="48" y="206" width="32" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="64.0" y="215" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">PAGE</text>
+<text x="200.0" y="229.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">page.tsx</text>
+<text x="200.0" y="244.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">await searchParams; today = toISOString().slice(0, 10)</text>
+<rect x="40" y="320" width="320" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="320" width="320" height="60" rx="6" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
+<rect x="48" y="326" width="22" height="12" rx="2" fill="none" stroke="#eb6c36" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="59.0" y="335" fill="#eb6c36" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DB</text>
+<text x="200.0" y="349.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">listTasks(getDb(), { show, q })</text>
+<text x="200.0" y="364.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">q: lower(title) LIKE %word%; src/lib/tasks/repository.ts</text>
+<rect x="520" y="330" width="400" height="40" rx="6" fill="#f5f5f5"/>
+<rect x="520" y="330" width="400" height="40" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="528" y="336" width="17" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="536.5" y="345" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">1</text>
+<text x="720.0" y="354.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">due_on ascending, undated last</text>
+<rect x="520" y="390" width="400" height="40" rx="6" fill="#f5f5f5"/>
+<rect x="520" y="390" width="400" height="40" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="528" y="396" width="17" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="536.5" y="405" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">2</text>
+<text x="720.0" y="414.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">priority: 1 High, 2 Normal, 3 Low</text>
+<rect x="520" y="450" width="400" height="40" rx="6" fill="#f5f5f5"/>
+<rect x="520" y="450" width="400" height="40" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="528" y="456" width="17" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="536.5" y="465" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">3</text>
+<text x="720.0" y="474.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">created_at DESC, id DESC (newest first)</text>
+<rect x="40" y="460" width="320" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="460" width="320" height="60" rx="6" fill="#2d3142" fill-opacity="0.05" stroke="#4f5d75" stroke-width="1"/>
+<rect x="48" y="466" width="32" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="64.0" y="475" fill="#4f5d75" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ROWS</text>
+<text x="200.0" y="482.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">TaskList</text>
+<text x="200.0" y="497.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">badge High / Low · Due YYYY-MM-DD</text>
+<text x="200.0" y="510.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Overdue: open and dueOn &lt; today</text>
+  <line x1="30" y1="572" x2="930" y2="572" stroke="#2d3142" stroke-opacity="0.10" stroke-width="0.8"/>
+  <text x="30" y="590" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+  <line x1="110" y1="586" x2="140" y2="586" stroke="#eb6c36" stroke-width="1.2"/>
+  <text x="148" y="589" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">THE QUERY AND ITS ORDER</text>
+  <line x1="300" y1="586" x2="330" y2="586" stroke="#4f5d75" stroke-width="1.2"/>
+  <text x="338" y="589" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">CALL / RENDER</text>
+  <line x1="440" y1="586" x2="470" y2="586" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="478" y="589" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">DATA PASSED DOWN / LOOP BACK</text>
+</svg>

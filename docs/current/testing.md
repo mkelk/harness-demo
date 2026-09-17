@@ -31,11 +31,13 @@ the orchestrator runs it on the integrated tree before a wave closes.
 - Integration tests open a fresh database with `createTestDb()` from `src/lib/db/`: a
   temp file per test, migrated, removed by `close()`. Never `data/dev.db`.
 - E2E tests use `page.getByRole`, `getByLabel` and visible text, not CSS selectors.
-  `e2e/tasks.spec.ts` is one serial flow (`test.describe.configure({ mode: "serial" })`)
+  Each spec file is one serial flow (`test.describe.configure({ mode: "serial" })`)
   on a fresh per-run database (`data/e2e-<timestamp>.db`): later tests build on rows
   earlier tests created, so `playwright.config.ts` sets `retries: 0` (a retry cannot
   start from a fresh database, and would repeat later steps against rows earlier steps
-  already changed).
+  already changed). Files run alphabetically; only `e2e/tasks.spec.ts` may assume an
+  empty database, so every other file (`e2e/scheduling.spec.ts`) creates rows with its
+  own title prefix and deletes them in its last test.
 - The repo guards (`scripts/check-docs.test.ts`) test the checker against temp
   directories, never against the real `docs/current/`; `scripts/check-rules.test.ts`
   walks the real `src/` for `process.env` outside `src/lib/env.ts` and `node:sqlite`

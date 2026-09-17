@@ -4,10 +4,21 @@ import {
   createTask,
   deleteTask,
   getTask,
+  isOverdue,
   listTasks,
   setDone,
   updateTask,
 } from "./repository";
+import { createList } from "@/lib/lists/repository";
+import type { TaskInput } from "./types";
+
+const base: TaskInput = {
+  title: "",
+  notes: "",
+  dueOn: null,
+  priority: 2,
+  listId: null,
+};
 
 let testDb: TestDb | undefined;
 
@@ -26,32 +37,203 @@ describe("listTasks", () => {
   it("returns empty open and done lists on an empty db", () => {
     expect(listTasks(db())).toEqual({ open: [], done: [] });
   });
+
+  it("orders open tasks by due date (undated last), priority, then newest", () => {
+    const d = db();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-01T00:00:00.000Z"));
+    const inputs: TaskInput[] = [
+      { ...base, title: "undated normal older" },
+      { ...base, title: "undated normal newest" },
+      { ...base, title: "undated high", priority: 1 },
+      {
+        ...base,
+        title: "due 2026-01-02 high",
+        dueOn: "2026-01-02",
+        priority: 1,
+      },
+      { ...base, title: "due 2026-01-01 normal", dueOn: "2026-01-01" },
+    ];
+    for (const input of inputs) {
+      createTask(d, input);
+      vi.advanceTimersByTime(1000);
+    }
+    const { open } = listTasks(d);
+    expect(open.map((t) => t.title)).toEqual([
+      "due 2026-01-01 normal",
+      "due 2026-01-02 high",
+      "undated high",
+      "undated normal newest",
+      "undated normal older",
+    ]);
+  });
+
+  it("show 'done' returns no open rows; show 'all' returns both", () => {
+    const d = db();
+    const a = createTask(d, { ...base, title: "A" });
+    createTask(d, { ...base, title: "B" });
+    setDone(d, a.id, true);
+    const done = listTasks(d, { show: "done" });
+    expect(done.open).toEqual([]);
+    expect(done.done.map((t) => t.title)).toEqual(["A"]);
+    const all = listTasks(d, { show: "all" });
+    expect(all.open.map((t) => t.title)).toEqual(["B"]);
+    expect(all.done.map((t) => t.title)).toEqual(["A"]);
+    const open = listTasks(d, { show: "open" });
+    expect(open.open.map((t) => t.title)).toEqual(["B"]);
+    expect(open.done).toEqual([]);
+  });
+
+  it("q filters both lists by case-insensitive title substring", () => {
+    const d = db();
+    createTask(d, { ...base, title: "Buy MILK" });
+    createTask(d, { ...base, title: "Bread" });
+    const oat = createTask(d, { ...base, title: "Oat milk" });
+    setDone(d, oat.id, true);
+    const result = listTasks(d, { show: "all", q: " milk " });
+    expect(result.open.map((t) => t.title)).toEqual(["Buy MILK"]);
+    expect(result.done.map((t) => t.title)).toEqual(["Oat milk"]);
+    expect(listTasks(d, { q: "   " }).open).toHaveLength(2);
+  });
+
+  it("listId returns only that list's open and done tasks; undefined returns all", () => {
+    const d = db();
+    const groceries = createList(d, "Groceries");
+    const other = createList(d, "Other");
+    createTask(d, { ...base, title: "Milk", listId: groceries.id });
+    const bread = createTask(d, {
+      ...base,
+      title: "Bread",
+      listId: groceries.id,
+    });
+    createTask(d, { ...base, title: "Elsewhere", listId: other.id });
+    const unlisted = createTask(d, { ...base, title: "Unlisted" });
+    setDone(d, bread.id, true);
+    setDone(d, unlisted.id, true);
+    const scoped = listTasks(d, { show: "all", listId: groceries.id });
+    expect(scoped.open.map((t) => t.title)).toEqual(["Milk"]);
+    expect(scoped.done.map((t) => t.title)).toEqual(["Bread"]);
+    const all = listTasks(d, { show: "all" });
+    expect(all.open.map((t) => t.title)).toEqual(["Elsewhere", "Milk"]);
+    expect(all.done.map((t) => t.title)).toEqual(["Unlisted", "Bread"]);
+    expect(listTasks(d, { listId: 999 })).toEqual({ open: [], done: [] });
+  });
+
+  it("listId combines with q", () => {
+    const d = db();
+    const groceries = createList(d, "Groceries");
+    createTask(d, { ...base, title: "Oat milk", listId: groceries.id });
+    createTask(d, { ...base, title: "Bread", listId: groceries.id });
+    createTask(d, { ...base, title: "Milk elsewhere" });
+    expect(
+      listTasks(d, { listId: groceries.id, q: "milk" }).open.map(
+        (t) => t.title,
+      ),
+    ).toEqual(["Oat milk"]);
+  });
+
+  it("treats %, _ and \\ in q as literal characters, not LIKE wildcards", () => {
+    const d = db();
+    createTask(d, { ...base, title: "100% done" });
+    createTask(d, { ...base, title: "100 done" });
+    createTask(d, { ...base, title: "a_b" });
+    createTask(d, { ...base, title: "axb" });
+    expect(listTasks(d, { q: "100%" }).open.map((t) => t.title)).toEqual([
+      "100% done",
+    ]);
+    expect(listTasks(d, { q: "a_b" }).open.map((t) => t.title)).toEqual([
+      "a_b",
+    ]);
+  });
+});
+
+describe("isOverdue", () => {
+  const today = "2026-09-17";
+
+  it("is true for an open task due yesterday", () => {
+    expect(isOverdue({ dueOn: "2026-09-16", doneAt: null }, today)).toBe(true);
+  });
+
+  it("is false for a task due today", () => {
+    expect(isOverdue({ dueOn: "2026-09-17", doneAt: null }, today)).toBe(false);
+  });
+
+  it("is false for a done task due yesterday", () => {
+    expect(
+      isOverdue(
+        { dueOn: "2026-09-16", doneAt: "2026-09-16T10:00:00.000Z" },
+        today,
+      ),
+    ).toBe(false);
+  });
+
+  it("is false for an undated task", () => {
+    expect(isOverdue({ dueOn: null, doneAt: null }, today)).toBe(false);
+  });
 });
 
 describe("createTask", () => {
   it("inserts a task with id 1, no done_at and matching created/updated timestamps", () => {
     const d = db();
-    const task = createTask(d, { title: "Buy milk", notes: "" });
+    const task = createTask(d, { ...base, title: "Buy milk" });
     expect(task.id).toBe(1);
     expect(task.doneAt).toBeNull();
+    expect(task.dueOn).toBeNull();
+    expect(task.priority).toBe(2);
     expect(typeof task.createdAt).toBe("string");
     expect(task.createdAt).toBe(task.updatedAt);
     expect(new Date(task.createdAt).toString()).not.toBe("Invalid Date");
     expect(listTasks(d).open[0]?.title).toBe("Buy milk");
   });
 
-  it("orders open tasks newest first", () => {
+  it("stores dueOn and priority", () => {
     const d = db();
-    createTask(d, { title: "First", notes: "" });
-    createTask(d, { title: "Second", notes: "" });
-    createTask(d, { title: "Third", notes: "" });
+    const task = createTask(d, {
+      ...base,
+      title: "Buy milk",
+      dueOn: "2026-09-30",
+      priority: 1,
+    });
+    expect(task.dueOn).toBe("2026-09-30");
+    expect(task.priority).toBe(1);
+    expect(task.listId).toBeNull();
+    expect(getTask(d, task.id)).toEqual(task);
+  });
+
+  it("stores listId", () => {
+    const d = db();
+    const list = createList(d, "Groceries");
+    const task = createTask(d, { ...base, title: "Milk", listId: list.id });
+    expect(task.listId).toBe(list.id);
+    expect(getTask(d, task.id)?.listId).toBe(list.id);
+  });
+
+  it("throws when listId points at no list (FOREIGN KEY constraint)", () => {
+    const d = db();
+    expect(() => createTask(d, { ...base, title: "Milk", listId: 42 })).toThrow(
+      /FOREIGN KEY constraint/,
+    );
+  });
+
+  it("orders undated open tasks of equal priority by created_at, not id", () => {
+    const d = db();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-01T00:00:01.000Z"));
+    createTask(d, { ...base, title: "First" });
+    vi.setSystemTime(new Date("2024-01-01T00:00:03.000Z"));
+    createTask(d, { ...base, title: "Second" });
+    // Set the clock backwards so the third (highest id) insert gets an
+    // older created_at than the second: id DESC alone would put it first,
+    // but created_at DESC must win.
+    vi.setSystemTime(new Date("2024-01-01T00:00:02.000Z"));
+    createTask(d, { ...base, title: "Third" });
     const { open } = listTasks(d);
-    expect(open.map((t) => t.id)).toEqual([3, 2, 1]);
+    expect(open.map((t) => t.id)).toEqual([2, 3, 1]);
   });
 
   it("throws when the title is 201 characters (CHECK constraint)", () => {
     const d = db();
-    expect(() => createTask(d, { title: "a".repeat(201), notes: "" })).toThrow(
+    expect(() => createTask(d, { ...base, title: "a".repeat(201) })).toThrow(
       /CHECK constraint/,
     );
   });
@@ -60,30 +242,30 @@ describe("createTask", () => {
 describe("setDone", () => {
   it("marks a task done, moving it from open to done", () => {
     const d = db();
-    const task = createTask(d, { title: "Buy milk", notes: "" });
+    const task = createTask(d, { ...base, title: "Buy milk" });
     const done = setDone(d, task.id, true);
     expect(done?.doneAt).toEqual(expect.any(String));
-    const { open, done: doneList } = listTasks(d);
+    const { open, done: doneList } = listTasks(d, { show: "all" });
     expect(open.find((t) => t.id === task.id)).toBeUndefined();
     expect(doneList.find((t) => t.id === task.id)).toBeDefined();
   });
 
   it("orders done tasks by done_at DESC, not id DESC", () => {
     const d = db();
-    const first = createTask(d, { title: "First", notes: "" });
-    const second = createTask(d, { title: "Second", notes: "" });
+    const first = createTask(d, { ...base, title: "First" });
+    const second = createTask(d, { ...base, title: "Second" });
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2024-01-01T00:00:00.000Z"));
     setDone(d, second.id, true);
     vi.setSystemTime(new Date("2024-01-01T00:00:01.000Z"));
     setDone(d, first.id, true);
-    const { done } = listTasks(d);
+    const { done } = listTasks(d, { show: "done" });
     expect(done.map((t) => t.id)).toEqual([1, 2]);
   });
 
   it("is a no-op when already done (same doneAt on second call)", () => {
     const d = db();
-    const task = createTask(d, { title: "Buy milk", notes: "" });
+    const task = createTask(d, { ...base, title: "Buy milk" });
     const first = setDone(d, task.id, true);
     const second = setDone(d, task.id, true);
     expect(second?.doneAt).toBe(first?.doneAt);
@@ -91,7 +273,7 @@ describe("setDone", () => {
 
   it("reopens a done task, clearing doneAt", () => {
     const d = db();
-    const task = createTask(d, { title: "Buy milk", notes: "" });
+    const task = createTask(d, { ...base, title: "Buy milk" });
     setDone(d, task.id, true);
     const reopened = setDone(d, task.id, false);
     expect(reopened?.doneAt).toBeNull();
@@ -109,22 +291,55 @@ describe("updateTask", () => {
     const d = db();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2024-01-01T00:00:00.000Z"));
-    const task = createTask(d, { title: "Buy milk", notes: "" });
+    const task = createTask(d, { ...base, title: "Buy milk" });
     vi.setSystemTime(new Date("2024-01-01T00:00:01.000Z"));
     const updated = updateTask(d, task.id, {
+      ...base,
       title: "Buy oat milk",
       notes: "2 litres",
     });
     expect(updated).not.toBeNull();
     expect(updated?.title).toBe("Buy oat milk");
     expect(updated?.notes).toBe("2 litres");
+    expect(updated?.dueOn).toBeNull();
+    expect(updated?.priority).toBe(2);
     expect(updated!.updatedAt > updated!.createdAt).toBe(true);
     expect(getTask(d, task.id)).toEqual(updated);
   });
 
+  it("sets and clears listId", () => {
+    const d = db();
+    const list = createList(d, "Groceries");
+    const task = createTask(d, { ...base, title: "Buy milk" });
+    const moved = updateTask(d, task.id, {
+      ...base,
+      title: "Buy milk",
+      listId: list.id,
+    });
+    expect(moved?.listId).toBe(list.id);
+    const cleared = updateTask(d, task.id, { ...base, title: "Buy milk" });
+    expect(cleared?.listId).toBeNull();
+  });
+
+  it("changes dueOn and priority", () => {
+    const d = db();
+    const task = createTask(d, { ...base, title: "Buy milk" });
+    const updated = updateTask(d, task.id, {
+      ...base,
+      title: "Buy milk",
+      dueOn: "2026-09-30",
+      priority: 3,
+    });
+    expect(updated?.dueOn).toBe("2026-09-30");
+    expect(updated?.priority).toBe(3);
+    const cleared = updateTask(d, task.id, { ...base, title: "Buy milk" });
+    expect(cleared?.dueOn).toBeNull();
+    expect(cleared?.priority).toBe(2);
+  });
+
   it("returns null for an unknown id", () => {
     const d = db();
-    expect(updateTask(d, 999, { title: "x", notes: "" })).toBeNull();
+    expect(updateTask(d, 999, { ...base, title: "x" })).toBeNull();
   });
 });
 
@@ -138,7 +353,7 @@ describe("getTask", () => {
 describe("deleteTask", () => {
   it("returns true when deleting, then false, and getTask returns null", () => {
     const d = db();
-    const task = createTask(d, { title: "Buy milk", notes: "" });
+    const task = createTask(d, { ...base, title: "Buy milk" });
     expect(deleteTask(d, task.id)).toBe(true);
     expect(deleteTask(d, task.id)).toBe(false);
     expect(getTask(d, task.id)).toBeNull();

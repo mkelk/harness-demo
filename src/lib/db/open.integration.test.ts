@@ -2,7 +2,13 @@ import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { applyMigrations, createTestDb, openDatabase } from "./index";
+import {
+  applyMigrations,
+  createTestDb,
+  MIGRATIONS,
+  openDatabase,
+} from "./index";
+import { migration0001 } from "./migrations/0001_tasks";
 
 const dirs: string[] = [];
 
@@ -25,12 +31,16 @@ describe("openDatabase", () => {
     db.close();
   });
 
-  it("applies migration 0001 and creates the tasks table", () => {
+  it("applies migrations 0001 to 0003 and creates the tasks table", () => {
     const db = openDatabase(join(freshDir(), "app.db"));
     const rows = db
       .prepare("SELECT version, name FROM schema_migrations ORDER BY version")
       .all();
-    expect(rows).toEqual([{ version: 1, name: "tasks" }]);
+    expect(rows).toEqual([
+      { version: 1, name: "tasks" },
+      { version: 2, name: "task_schedule" },
+      { version: 3, name: "lists" },
+    ]);
     const columns = db
       .prepare("PRAGMA table_info(tasks)")
       .all()
@@ -42,7 +52,39 @@ describe("openDatabase", () => {
       "done_at",
       "created_at",
       "updated_at",
+      "due_on",
+      "priority",
+      "list_id",
     ]);
+    db.close();
+  });
+
+  it("migration 0003 creates lists and tasks.list_id with ON DELETE SET NULL", () => {
+    const db = openDatabase(join(freshDir(), "app.db"));
+    const lists = db
+      .prepare("PRAGMA table_info(lists)")
+      .all()
+      .map((row) => (row as { name: string }).name);
+    expect(lists).toEqual(["id", "name", "created_at"]);
+    const foreignKeys = db.prepare("PRAGMA foreign_key_list(tasks)").all() as {
+      table: string;
+      from: string;
+      to: string;
+      on_delete: string;
+    }[];
+    expect(foreignKeys).toEqual([
+      expect.objectContaining({
+        table: "lists",
+        from: "list_id",
+        to: "id",
+        on_delete: "SET NULL",
+      }),
+    ]);
+    const indexes = db
+      .prepare("PRAGMA index_list(tasks)")
+      .all()
+      .map((row) => (row as { name: string }).name);
+    expect(indexes).toContain("tasks_list_idx");
     db.close();
   });
 
@@ -58,6 +100,31 @@ describe("openDatabase", () => {
 });
 
 describe("applyMigrations", () => {
+  it("applies migrations 0002 and 0003 on a db that already had 0001", () => {
+    const { db, close } = createTestDb();
+    // createTestDb applies MIGRATIONS; start again from a db with only 0001.
+    db.exec("DROP TABLE tasks; DROP TABLE lists; DROP TABLE schema_migrations");
+    expect(applyMigrations(db, [migration0001])).toBe(1);
+    db.prepare(
+      "INSERT INTO tasks (title, notes, done_at, created_at, updated_at) VALUES (?, '', NULL, ?, ?)",
+    ).run("Buy milk", "2024-01-01T00:00:00.000Z", "2024-01-01T00:00:00.000Z");
+    expect(applyMigrations(db, MIGRATIONS)).toBe(2);
+    const rows = db
+      .prepare("SELECT version FROM schema_migrations ORDER BY version")
+      .all()
+      .map((row) => (row as { version: number }).version);
+    expect(rows).toEqual([1, 2, 3]);
+    const task = db
+      .prepare("SELECT priority, due_on, list_id FROM tasks WHERE title = ?")
+      .get("Buy milk") as {
+      priority: number;
+      due_on: string | null;
+      list_id: number | null;
+    };
+    expect(task).toEqual({ priority: 2, due_on: null, list_id: null });
+    close();
+  });
+
   it("applies a custom migration once", () => {
     const { db, close } = createTestDb();
     const custom = [{ version: 7, name: "x", sql: "CREATE TABLE x(a)" }];

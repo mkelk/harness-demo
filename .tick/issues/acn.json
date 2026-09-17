@@ -1,0 +1,19 @@
+{
+  "id": "acn",
+  "title": "Close out Lists and filtering: run epic retro, then reach the project checkpoint",
+  "description": "Epic-close retro per the ticks skill and .tick/config.md → At epic close-out (ia-cycles report, history, _overview, living-docs audit rendering lists-and-filters and re-rendering data-model, tag 02-ngm.lists-and-filtering). Then the increment has no further epics: apply At project checkpoint (completion.md, stop; never merge to main).",
+  "status": "closed",
+  "priority": 2,
+  "type": "task",
+  "owner": "morten@elk.dk",
+  "blocked_by": [
+    "wej"
+  ],
+  "parent": "isl",
+  "role": "closeout",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T14:15:21.018186845Z",
+  "updated_at": "2026-09-17T14:50:21.34376593Z",
+  "closed_at": "2026-09-17T14:50:21.34376593Z",
+  "closed_reason": "Completed: retro, learnings, docs rendered and stamped, tagged; increment reaches its project checkpoint"
+}

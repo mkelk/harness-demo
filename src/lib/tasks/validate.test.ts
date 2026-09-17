@@ -2,8 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   formDataToRaw,
   NOTES_MAX,
+  parseDueOn,
+  parsePriority,
+  parseFilterQuery,
   parseTaskId,
   parseTaskInput,
+  PRIORITY_LABELS,
   submittedValues,
   TITLE_MAX,
 } from "./validate";
@@ -76,6 +80,109 @@ describe("parseTaskInput", () => {
     }
   });
 
+  it("defaults dueOn to null and priority to 2 when the fields are absent", () => {
+    const result = parseTaskInput({ title: "Buy milk" });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toEqual({
+        title: "Buy milk",
+        notes: "",
+        dueOn: null,
+        priority: 2,
+        listId: null,
+      });
+    }
+  });
+
+  it("rejects a listId that is not in options.listIds", () => {
+    const result = parseTaskInput(
+      { title: "Buy milk", listId: "3" },
+      { listIds: [1, 2] },
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors).toEqual({ listId: "List does not exist." });
+    }
+  });
+
+  it("accepts a listId that is in options.listIds", () => {
+    const result = parseTaskInput(
+      { title: "Buy milk", listId: "2" },
+      { listIds: [1, 2] },
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.listId).toBe(2);
+  });
+
+  it.each([[""], [undefined], [null]])(
+    "treats listId %p as null even with listIds given",
+    (raw) => {
+      const result = parseTaskInput(
+        { title: "Buy milk", listId: raw },
+        { listIds: [1, 2] },
+      );
+      expect(result.ok).toBe(true);
+      if (result.ok) expect(result.value.listId).toBeNull();
+    },
+  );
+
+  it("accepts any positive listId when no options are given", () => {
+    const result = parseTaskInput({ title: "Buy milk", listId: "9" });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.listId).toBe(9);
+  });
+
+  it.each([["0"], ["-1"], ["abc"], ["1.5"]])(
+    "rejects a malformed listId %p",
+    (raw) => {
+      const result = parseTaskInput({ title: "Buy milk", listId: raw });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.errors.listId).toBe("List does not exist.");
+      }
+    },
+  );
+
+  it("reports a listId error alongside title errors", () => {
+    const result = parseTaskInput({ title: "", listId: "7" }, { listIds: [] });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors).toEqual({
+        title: "Title is required.",
+        listId: "List does not exist.",
+      });
+    }
+  });
+
+  it("accepts a valid dueOn and priority", () => {
+    const result = parseTaskInput({
+      title: "Buy milk",
+      dueOn: "2026-09-30",
+      priority: "1",
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.dueOn).toBe("2026-09-30");
+      expect(result.value.priority).toBe(1);
+    }
+  });
+
+  it("reports dueOn and priority errors alongside title errors", () => {
+    const result = parseTaskInput({
+      title: "",
+      dueOn: "2026-02-30",
+      priority: "4",
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors).toEqual({
+        title: "Title is required.",
+        dueOn: "Due must be a date (YYYY-MM-DD).",
+        priority: "Priority must be high, normal or low.",
+      });
+    }
+  });
+
   it("treats a non-string title as empty", () => {
     const result = parseTaskInput({ title: 42 });
     expect(result.ok).toBe(false);
@@ -99,15 +206,76 @@ describe("parseTaskInput", () => {
   });
 });
 
+describe("parseDueOn", () => {
+  it.each([
+    ["", null],
+    ["   ", null],
+    [undefined, null],
+    [null, null],
+    [42, null],
+    ["2026-09-30", "2026-09-30"],
+    [" 2026-09-30 ", "2026-09-30"],
+  ])("parses %p as %p", (raw, value) => {
+    expect(parseDueOn(raw)).toEqual({ ok: true, value });
+  });
+
+  it.each([["2026-02-30"], ["30/09/2026"], ["2026-9-30"], ["2026-13-01"]])(
+    "rejects %p",
+    (raw) => {
+      expect(parseDueOn(raw)).toEqual({
+        ok: false,
+        error: "Due must be a date (YYYY-MM-DD).",
+      });
+    },
+  );
+});
+
+describe("parsePriority", () => {
+  it.each([
+    [undefined, 2],
+    [null, 2],
+    ["", 2],
+    ["1", 1],
+    ["2", 2],
+    ["3", 3],
+    [1, 1],
+    [3, 3],
+  ])("parses %p as %p", (raw, value) => {
+    expect(parsePriority(raw)).toEqual({ ok: true, value });
+  });
+
+  it.each([["4"], ["0"], ["high"], [4], [1.5], ["1.0"]])(
+    "rejects %p",
+    (raw) => {
+      expect(parsePriority(raw)).toEqual({
+        ok: false,
+        error: "Priority must be high, normal or low.",
+      });
+    },
+  );
+});
+
+describe("PRIORITY_LABELS", () => {
+  it("names the three priorities", () => {
+    expect(PRIORITY_LABELS).toEqual({ 1: "High", 2: "Normal", 3: "Low" });
+  });
+});
+
 describe("formDataToRaw", () => {
-  it("reads title and notes from FormData", () => {
+  it("reads title, notes, dueOn, priority and listId from FormData", () => {
     const formData = new FormData();
     formData.append("title", "Buy milk");
     formData.append("notes", "2%");
+    formData.append("dueOn", "2026-09-30");
+    formData.append("priority", "1");
+    formData.append("listId", "4");
 
     expect(formDataToRaw(formData)).toEqual({
       title: "Buy milk",
       notes: "2%",
+      dueOn: "2026-09-30",
+      priority: "1",
+      listId: "4",
     });
   });
 
@@ -115,7 +283,13 @@ describe("formDataToRaw", () => {
     const formData = new FormData();
 
     const raw = formDataToRaw(formData);
-    expect(raw).toEqual({ title: null, notes: null });
+    expect(raw).toEqual({
+      title: null,
+      notes: null,
+      dueOn: null,
+      priority: null,
+      listId: null,
+    });
 
     const result = parseTaskInput(raw);
     expect(result.ok).toBe(false);
@@ -143,20 +317,55 @@ describe("parseTaskId", () => {
 });
 
 describe("submittedValues", () => {
-  it("reads title and notes as submitted", () => {
+  it("reads title, notes, dueOn, priority and listId as submitted", () => {
     const formData = new FormData();
     formData.append("title", "Buy milk");
     formData.append("notes", "2%");
+    formData.append("dueOn", "2026-02-30");
+    formData.append("priority", "4");
+    formData.append("listId", "3");
 
     expect(submittedValues(formData)).toEqual({
       title: "Buy milk",
       notes: "2%",
+      dueOn: "2026-02-30",
+      priority: "4",
+      listId: "3",
     });
   });
 
   it("coerces non-string (missing) values to an empty string", () => {
     const formData = new FormData();
 
-    expect(submittedValues(formData)).toEqual({ title: "", notes: "" });
+    expect(submittedValues(formData)).toEqual({
+      title: "",
+      notes: "",
+      dueOn: "",
+      priority: "",
+      listId: "",
+    });
+  });
+});
+
+describe("parseFilterQuery", () => {
+  it("reads show and a trimmed q from the search params", () => {
+    expect(parseFilterQuery({ show: "done", q: "  milk " })).toEqual({
+      show: "done",
+      q: "milk",
+    });
+  });
+
+  it("treats a missing or unknown show as undefined and a missing q as empty", () => {
+    expect(parseFilterQuery({})).toEqual({ show: undefined, q: "" });
+    expect(parseFilterQuery({ show: "later" })).toEqual({
+      show: undefined,
+      q: "",
+    });
+  });
+
+  it("uses the first value of a repeated parameter", () => {
+    expect(parseFilterQuery({ show: ["open", "done"], q: ["a", "b"] })).toEqual(
+      { show: "open", q: "a" },
+    );
   });
 });

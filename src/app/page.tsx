@@ -1,24 +1,18 @@
-import { getDb } from "@/lib/db";
-import { listTasks } from "@/lib/tasks/repository";
-import { AddTaskForm } from "./components/add-task-form";
-import { TaskList } from "./components/task-list";
+import { TaskPage } from "./components/task-page";
+import { parseFilterQuery } from "@/lib/tasks/validate";
 
 // The list is read from the database on every request, never prerendered.
 export const dynamic = "force-dynamic";
 
-export default function Home() {
-  const { open, done } = listTasks(getDb());
-  return (
-    <main className="mx-auto max-w-2xl p-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold">harness-demo</h1>
-        <p className="mt-1 text-sm text-zinc-600">
-          A small task manager, built increment by increment with the dmtix
-          method.
-        </p>
-      </header>
-      <AddTaskForm />
-      <TaskList open={open} done={done} />
-    </main>
-  );
+type SearchParams = Record<string, string | string[] | undefined>;
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const { show, q } = parseFilterQuery(await searchParams);
+  // Computed once per request, in the server's timezone as a UTC calendar day.
+  const today = new Date().toISOString().slice(0, 10);
+  return <TaskPage list={null} show={show} q={q} today={today} />;
 }

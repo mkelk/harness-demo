@@ -4,10 +4,24 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { saveTask, type SaveTaskState } from "@/app/tasks/[id]/edit/actions";
 import type { Task } from "@/lib/tasks/types";
+import { type ListOption, TaskFields } from "./task-fields";
 
-export function EditTaskForm({ task }: { task: Task }) {
+export function EditTaskForm({
+  task,
+  lists,
+}: {
+  task: Task;
+  lists: ListOption[];
+}) {
   const [state, formAction] = useActionState(saveTask, {});
-  return <EditTaskFormView task={task} state={state} action={formAction} />;
+  return (
+    <EditTaskFormView
+      task={task}
+      lists={lists}
+      state={state}
+      action={formAction}
+    />
+  );
 }
 
 /**
@@ -17,54 +31,34 @@ export function EditTaskForm({ task }: { task: Task }) {
  */
 export function EditTaskFormView({
   task,
+  lists,
   state,
   action,
 }: {
   task: Task;
+  lists: ListOption[];
   state: SaveTaskState;
   action: (formData: FormData) => void;
 }) {
-  const values = state.values ?? { title: task.title, notes: task.notes };
+  const values = state.values ?? {
+    title: task.title,
+    notes: task.notes,
+    dueOn: task.dueOn ?? "",
+    priority: String(task.priority),
+    listId: task.listId === null ? "" : String(task.listId),
+  };
   return (
     <form
       action={action}
       className="flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white p-4"
     >
       <input type="hidden" name="id" value={task.id} />
-      <div className="flex flex-col gap-1">
-        <label htmlFor="edit-title" className="text-sm font-medium">
-          Title
-        </label>
-        <input
-          id="edit-title"
-          name="title"
-          type="text"
-          defaultValue={values.title}
-          className="rounded border border-zinc-300 px-2 py-1"
-        />
-        {state.errors?.title ? (
-          <p role="alert" className="text-sm text-red-700">
-            {state.errors.title}
-          </p>
-        ) : null}
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="edit-notes" className="text-sm font-medium">
-          Notes
-        </label>
-        <textarea
-          id="edit-notes"
-          name="notes"
-          rows={4}
-          defaultValue={values.notes}
-          className="rounded border border-zinc-300 px-2 py-1"
-        />
-        {state.errors?.notes ? (
-          <p role="alert" className="text-sm text-red-700">
-            {state.errors.notes}
-          </p>
-        ) : null}
-      </div>
+      <TaskFields
+        idPrefix="edit"
+        values={values}
+        errors={state.errors}
+        lists={lists}
+      />
       <div className="flex items-center gap-4">
         <button
           type="submit"

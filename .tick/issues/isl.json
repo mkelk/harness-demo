@@ -1,0 +1,20 @@
+{
+  "id": "isl",
+  "title": "Lists and filtering",
+  "description": "Migration 0003 (lists table, tasks.list_id ON DELETE SET NULL, index), lists domain (types, parseListName, listLists with open counts/getList/createList/deleteList), Task.listId and TaskInput.listId with parseTaskInput({listIds}) validation and message 'List does not exist.', listTasks({listId}) scoping, sidebar nav (All tasks, per-list links with open counts, New list form), /lists/[id] page (scoped list, add form defaulting to the list, Delete list button, 404), List select in TaskFields, list name link on /, e2e/lists.spec.ts, docs how/lists.md (diagram: lists-and-filters) and data-model.md updated. Expected shape: wave 1 domain tick, wave 2 warm-chain (sidebar + create/delete → scoping + selects + e2e + docs). Source of truth: docs/thoughts/2026-09-17-increment-02-organise.md → 'Task fields' (List row), 'The list page' (sidebar, /lists/\u003cid\u003e), 'Validation messages', 'Migration 0003', 'Domain', 'App', 'Documentation added', 'Definitions of done → Epic 2'.",
+  "status": "closed",
+  "priority": 2,
+  "type": "epic",
+  "owner": "morten@elk.dk",
+  "blocked_by": [
+    "9jr"
+  ],
+  "parent": "2xs",
+  "acceptance_criteria": "A1, A2, A3, A4 green. Integration tests: migration 0003; createList then listLists returns it with openCount; duplicate name throws; deleteList nulls the tasks' listId and keeps them; listTasks({listId}) returns only that list's tasks; parseTaskInput rejects a listId not in listIds. e2e/lists.spec.ts: creating 'Groceries' shows it in the sidebar with '(0)'; adding a task on /lists/\u003cid\u003e shows it there with count '(1)' and on / with the list link; moving it to 'No list' via edit updates both; deleting the list returns to /, the task remains, sidebar no longer shows it; /lists/999999 is a 404; duplicate name shows 'A list with that name already exists.'. how/lists.md with the lists-and-filters diagram and data-model.md with lists and the relation exist and are listed.",
+  "base_branch": "2026-09-17-increment-02",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T13:42:29.779271192Z",
+  "updated_at": "2026-09-17T14:50:21.356855372Z",
+  "closed_at": "2026-09-17T14:50:21.356855372Z",
+  "closed_reason": "Completed: lists, sidebar, list pages, list select; 165 vitest, 21 e2e; retro in ia-cycles/lists-and-filtering.md"
+}

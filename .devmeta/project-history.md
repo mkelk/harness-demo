@@ -25,3 +25,21 @@ further epics: the run stops at the project checkpoint.
 ## 2026-09-17 — Increment 01-rxx shipped
 
 Checkpoint reviewed, `2026-09-17-increment-01` merged into `main`, project tick `m2h` closed.
+
+## 2026-09-17 — Increment 02-ngm, epic 1 "Due dates and priority" closed
+
+Tasks gained a due date and a priority; the open list is now ordered by due date, priority and
+age, overdue tasks are marked, and a filter bar narrows the page by state or by a search word.
+A solo domain tick set the contract, a two-tick chain built the shared form fields and the list
+page, and the review sent back three real defects: unescaped `LIKE` wildcards, a misleading
+empty state under the Open filter, and a doc table broken by `||`. Tag `02-ngm.due-dates-and-priority`.
+
+## 2026-09-17 — Increment 02-ngm, epic 2 "Lists and filtering" closed
+
+Tasks can now live in lists. A sidebar shows every list with its open count and a form to
+create one, each list has its own page with the same body as the home page, the task forms
+carry a List select, and deleting a list unlists its tasks through the database's own
+`ON DELETE SET NULL`. The review's two real findings were both about consistency (one
+revalidation helper for every write, inventory descriptions) rather than behaviour. Tag
+`02-ngm.lists-and-filtering`. The increment has no further epics: the run stops at the
+project checkpoint.
