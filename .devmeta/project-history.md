@@ -43,3 +43,7 @@ carry a List select, and deleting a list unlists its tasks through the database'
 revalidation helper for every write, inventory descriptions) rather than behaviour. Tag
 `02-ngm.lists-and-filtering`. The increment has no further epics: the run stops at the
 project checkpoint.
+
+## 2026-09-17 — Increment 02-ngm shipped
+
+Checkpoint reviewed, `2026-09-17-increment-02` merged into `main`, project tick `2xs` closed.
