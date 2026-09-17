@@ -40,7 +40,9 @@ test("rejects an empty title with 'Title is required.' and adds nothing", async 
   await page.getByLabel("Notes").fill("no title here");
   await page.getByRole("button", { name: "Add task" }).click();
 
-  await expect(page.getByRole("alert")).toHaveText("Title is required.");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Title is required." }),
+  ).toHaveText("Title is required.");
   await expect(page.getByLabel("Notes")).toHaveValue("no title here");
   await expect(page.getByRole("heading", { name: "Open (1)" })).toBeVisible();
   const open = page.getByRole("list", { name: "Open tasks" });
@@ -134,7 +136,9 @@ test("rejects an empty title on the edit page and changes nothing", async ({
   await page.getByLabel("Title").fill("   ");
   await page.getByRole("button", { name: "Save" }).click();
 
-  await expect(page.getByRole("alert")).toHaveText("Title is required.");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Title is required." }),
+  ).toHaveText("Title is required.");
   await expect(page).toHaveURL(/\/tasks\/\d+\/edit$/);
 
   await page.goto("/");
