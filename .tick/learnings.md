@@ -33,3 +33,21 @@
 **Problem:** A prose line in `testing.md` pointed at a file that never existed (`src/lib/tasks.test.ts`).
 **Cause:** The docs guard validates paths only in `## Key entry points` tables.
 **Rule:** When a tick creates or moves files, grep `docs/current` for the old and new paths, not just the how-page you are editing.
+
+## E2E and Next.js
+
+**Problem:** `page.getByRole("alert")` failed in strict mode: two elements matched.
+**Cause:** Next.js renders `#__next-route-announcer__` with `role="alert"` on every page.
+**Rule:** Scope alert lookups: `page.getByRole("alert").filter({ hasText: "<message>" })` or `getByText`.
+
+**Problem:** A retry of the serial e2e flow cannot pass: the first test expects an empty database.
+**Cause:** Playwright reruns a serial group from its first test but keeps the web server and its per-run `DATABASE_PATH`.
+**Rule:** Serial e2e flows run with `retries: 0`; a flaky serial test is fixed, not retried.
+
+**Problem:** React Testing Library left the previous test's DOM in place, so a second component test read stale markup.
+**Cause:** Auto-cleanup needs Vitest globals, which are off.
+**Rule:** `vitest.setup.ts` calls `afterEach(cleanup)`; do not add `globals: true` just for this.
+
+**Problem:** Three private copies of the same id-parsing rule appeared across two action files and a page.
+**Cause:** Each chain tick added what it needed locally.
+**Rule:** Any parsing of user input, including ids from hidden fields, lives in `src/lib/tasks/validate.ts` with unit tests; server actions only import it.

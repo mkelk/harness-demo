@@ -1,6 +1,6 @@
 # Increment 01-rxx — Task basics
 
-**Status:** IN PROGRESS (epic 1 DONE 2026-09-17, epic 2 next) · **Target:** 2026-09-18
+**Status:** AT CHECKPOINT (both epics DONE 2026-09-17; awaiting human review and merge) · **Target:** 2026-09-18
 **Engine:** synthesized ticks skill (user-level `~/.claude/skills/ticks/`, shared mode; not vendored)
 **Spec:** `docs/thoughts/2026-09-17-increment-01-task-basics.md` (source of truth for every epic)
 

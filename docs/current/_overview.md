@@ -32,4 +32,4 @@ Mermaid block; the procedure is `_documentation_principles.md` → **Diagrams fi
 | `data-model`   | `data-model.md`       | ER view of `tasks` and `schema_migrations` with their columns and constraints                                                                                                                                                                                                     |
 | `task-flow`    | `how/tasks.md`        | form submit, server action, `formDataToRaw` and `parseTaskInput`, errors back to the form or the repository write; the row forms into `toggleTask` and `removeTask`; the edit form into `saveTask` and `redirect("/")`; `revalidatePath("/")` and the page re-reading `listTasks` |
 
-**Last documentation update:** 2026-09-17 (epic Task list, tick xgu: how/tasks covers the edit page, saveTask and redirect-after-save; the task-flow diagram gained the edit branch).
+**Last documentation update:** 2026-09-17 (epic Task list closed: how/tasks with the task-flow diagram, testing and setup pages updated for the e2e flow).

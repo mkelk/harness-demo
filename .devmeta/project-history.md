@@ -11,3 +11,13 @@ parallel wave on top of a solo foundation tick. The frontier review found no blo
 tests that could not fail (timestamp ties) and a type import reaching through a test helper;
 one repair tick fixed those before close. First learnings file written. Tag
 `01-rxx.persistence-foundation`.
+
+## 2026-09-17 — Increment 01-rxx, epic 2 "Task list" closed
+
+The app became usable: a list page with an add form, done and reopen checkboxes, delete
+buttons, and an edit page, all through Next.js server actions calling the repository from
+epic 1. The three tickets ran as one warm-chain in a single worktree because they shared the
+same files; the post-merge e2e gate caught a selector clash with Next's route announcer, and
+the frontier review sent duplicated id parsing back into the validation module. Ten Playwright
+tests cover every user path in the spec. Tag `01-rxx.task-list`. The increment now has no
+further epics: the run stops at the project checkpoint.
