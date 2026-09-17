@@ -1,0 +1,16 @@
+{
+  "id": "jwj",
+  "title": "Repairs from final review of Task list",
+  "description": "Repairs routed from the epic's final review (tick 6vt). Apply exactly these; nothing else.\n1. Move id and submitted-value parsing into src/lib/tasks/validate.ts: export `parseTaskId(raw: unknown): number | null` (accepts a string or number that is a positive safe integer; \"0\", \"-1\", \"1.5\", \"abc\", \"\", null → null; \"12\" → 12) and `submittedValues(formData: FormData): { title: string; notes: string }` (the strings as submitted, non-strings → \"\"). Add unit tests for both in src/lib/tasks/validate.test.ts (the listed cases). Replace the private copies `submitted()` / `taskId()` in src/app/actions.ts and src/app/tasks/[id]/edit/actions.ts and `parseId()` in src/app/tasks/[id]/edit/page.tsx with imports of these two functions. Behaviour unchanged (e2e must still pass post-merge).\n2. e2e: keep the serial flow but make retries honest: in playwright.config.ts set `retries: 0` with a one-line comment explaining that the spec is one serial flow on a per-run database, so a retry cannot start from a fresh database. In docs/current/testing.md, state that e2e/tasks.spec.ts is one serial flow on a fresh per-run database and that tests build on each other's rows.\n3. docs/current/how/tasks.md around line 123: rewrite the orphaned fragment into one sentence: \"`getDb()` is imported only in the two `page.tsx` files and the two `actions.ts` files; client components receive plain data (`Task[]`) or the action function as props, so no `\"use client\"` file imports `@/lib/db`.\"\n4. src/app/actions.ts: remove the unused `ok` field from AddTaskState and its assignment (nonce alone drives the reset); update how/tasks.md if it mentions `ok`.\n5. src/app/components/add-task-form.test.tsx: add a test that types into the Title field, rerenders the view with a new nonce, and asserts the field is empty (proving the key-based reset).\nRun: pnpm typecheck \u0026\u0026 pnpm lint \u0026\u0026 pnpm test \u0026\u0026 pnpm docs:check",
+  "notes": "2026-09-17 15:33 - runner-state: runner=claude branch=tick/5qb/jwj worktree=../.ticks-worktrees/jwj base=e4e56912ad756d40e6b994078b7a26c0ccc5131d mode=solo-tick tier=balanced (repairs from review 6vt)",
+  "status": "in_progress",
+  "priority": 2,
+  "type": "task",
+  "owner": "morten@elk.dk",
+  "parent": "5qb",
+  "acceptance_criteria": "In-worktree gates pass; parseTaskId and submittedValues are exported from validate.ts with unit tests and used by both action files and the edit page; playwright retries is 0 with the comment; the tasks.md fragment is fixed; ok removed; nonce reset test present. Post-merge: pnpm test:e2e still 10 passing.",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T13:33:51.620277484Z",
+  "updated_at": "2026-09-17T13:33:52.603661049Z",
+  "started_at": "2026-09-17T13:33:52.590336495Z"
+}
