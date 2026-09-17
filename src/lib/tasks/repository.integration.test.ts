@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type TestDb } from "@/lib/db";
 import {
   createTask,
@@ -19,6 +19,7 @@ function db() {
 afterEach(() => {
   testDb?.close();
   testDb = undefined;
+  vi.useRealTimers();
 });
 
 describe("listTasks", () => {
@@ -67,14 +68,17 @@ describe("setDone", () => {
     expect(doneList.find((t) => t.id === task.id)).toBeDefined();
   });
 
-  it("orders done tasks newest-done first, id DESC on tie", () => {
+  it("orders done tasks by done_at DESC, not id DESC", () => {
     const d = db();
     const first = createTask(d, { title: "First", notes: "" });
     const second = createTask(d, { title: "Second", notes: "" });
-    setDone(d, first.id, true);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-01T00:00:00.000Z"));
     setDone(d, second.id, true);
+    vi.setSystemTime(new Date("2024-01-01T00:00:01.000Z"));
+    setDone(d, first.id, true);
     const { done } = listTasks(d);
-    expect(done.map((t) => t.id)).toEqual([2, 1]);
+    expect(done.map((t) => t.id)).toEqual([1, 2]);
   });
 
   it("is a no-op when already done (same doneAt on second call)", () => {
@@ -103,7 +107,10 @@ describe("setDone", () => {
 describe("updateTask", () => {
   it("changes title and notes and bumps updatedAt", () => {
     const d = db();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-01T00:00:00.000Z"));
     const task = createTask(d, { title: "Buy milk", notes: "" });
+    vi.setSystemTime(new Date("2024-01-01T00:00:01.000Z"));
     const updated = updateTask(d, task.id, {
       title: "Buy oat milk",
       notes: "2 litres",
@@ -111,7 +118,7 @@ describe("updateTask", () => {
     expect(updated).not.toBeNull();
     expect(updated?.title).toBe("Buy oat milk");
     expect(updated?.notes).toBe("2 litres");
-    expect(updated!.updatedAt >= updated!.createdAt).toBe(true);
+    expect(updated!.updatedAt > updated!.createdAt).toBe(true);
     expect(getTask(d, task.id)).toEqual(updated);
   });
 

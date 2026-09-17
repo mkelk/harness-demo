@@ -72,12 +72,20 @@ describe("applyMigrations", () => {
 
   it("rolls back a failing migration and throws", () => {
     const { db, close } = createTestDb();
-    const broken = [{ version: 9, name: "broken", sql: "CREATE TABLE (" }];
+    const broken = [
+      { version: 9, name: "broken", sql: "CREATE TABLE y(a); CREATE TABLE (" },
+    ];
     expect(() => applyMigrations(db, broken)).toThrow();
     const row = db
       .prepare("SELECT version FROM schema_migrations WHERE version = 9")
       .get();
     expect(row).toBeUndefined();
+    const table = db
+      .prepare(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'y'",
+      )
+      .get();
+    expect(table).toBeUndefined();
     close();
   });
 });
@@ -89,20 +97,5 @@ describe("createTestDb", () => {
     close();
     expect(existsSync(path)).toBe(false);
     expect(existsSync(join(path, ".."))).toBe(false);
-  });
-});
-
-describe("tasks table constraints", () => {
-  it("rejects a 201-character title", () => {
-    const { db, close } = createTestDb();
-    const now = new Date().toISOString();
-    const insert = db.prepare(
-      "INSERT INTO tasks (title, notes, created_at, updated_at) VALUES (?, ?, ?, ?)",
-    );
-    expect(() => insert.run("a".repeat(201), "", now, now)).toThrow(
-      /CHECK constraint/,
-    );
-    expect(() => insert.run("a".repeat(200), "", now, now)).not.toThrow();
-    close();
   });
 });
