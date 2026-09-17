@@ -11,11 +11,13 @@ A single-user task manager: a Next.js 16 app (App Router, React server component
 server actions) persisting to one SQLite file through Node's built-in `node:sqlite`. No
 external services. It runs with `pnpm dev` on port 3000 and stores data in `data/dev.db`.
 On `/` you add a task (title, optional notes, optional due date, priority High, Normal or
-Low), see the open list (dated tasks first by due date, then priority, then newest), mark a
-task done, reopen it, and delete it; `/tasks/<id>/edit` changes the same four fields;
-see `how/tasks.md`. Rows mark High and Low priority, the due date and `Overdue`; the
-filter bar narrows `/` to open, done or all tasks (`?show=`) and by a title word (`?q=`);
-see `how/scheduling.md`.
+Low, optional list), see the open list (dated tasks first by due date, then priority, then
+newest), mark a task done, reopen it, and delete it; `/tasks/<id>/edit` changes the same
+five fields; see `how/tasks.md`. Rows mark High and Low priority, the due date, `Overdue`
+and, on `/`, the list as a link; the filter bar narrows the page to open, done or all
+tasks (`?show=`) and by a title word (`?q=`); see `how/scheduling.md`. A sidebar lists
+every list with its open count and creates new ones; `/lists/<id>` shows one list, its
+add form preselecting it, and deletes the list (its tasks are kept); see `how/lists.md`.
 
 ## Key numbers
 

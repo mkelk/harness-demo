@@ -14,7 +14,8 @@ import { TaskList } from "./task-list";
  * lists and the tasks for the scope and renders the sidebar, the heading
  * (the list name, or All tasks), the add form, the filter bar and the task
  * sections. `headingActions` renders next to the heading (the Delete list
- * form on a list page).
+ * form on a list page). The lists also fill the List select of the add form
+ * (defaulting to the current list) and, on `/` only, the list link on rows.
  */
 export function TaskPage({
   list,
@@ -38,6 +39,7 @@ export function TaskPage({
     listId: list?.id,
   });
   const basePath = list ? `/lists/${list.id}` : "/";
+  const listOptions = lists.map(({ id, name }) => ({ id, name }));
   return (
     <main className="mx-auto max-w-4xl p-8">
       <header className="mb-6">
@@ -56,9 +58,16 @@ export function TaskPage({
             </h2>
             {headingActions}
           </div>
-          <AddTaskForm listId={list?.id} />
+          <AddTaskForm lists={listOptions} listId={list?.id} />
           <FilterBar show={show} q={q} basePath={basePath} />
-          <TaskList open={open} done={done} show={show} q={q} today={today} />
+          <TaskList
+            open={open}
+            done={done}
+            show={show}
+            q={q}
+            today={today}
+            lists={list ? undefined : listOptions}
+          />
         </section>
       </div>
     </main>

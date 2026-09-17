@@ -21,19 +21,25 @@ function FieldError({ message }: { message?: string }) {
   );
 }
 
+/** What the List select needs to know about a list. */
+export type ListOption = { id: number; name: string };
+
 /**
- * The labelled Title, Notes, Due and Priority controls shared by the add and
- * edit forms. Plain markup with no server imports, so it renders inside
- * `"use client"` forms. `idPrefix` keeps the ids unique per form.
+ * The labelled Title, Notes, Due, Priority and List controls shared by the
+ * add and edit forms. Plain markup with no server imports, so it renders
+ * inside `"use client"` forms. `idPrefix` keeps the ids unique per form;
+ * `lists` fills the List select after the "No list" option.
  */
 export function TaskFields({
   idPrefix,
   values,
   errors,
+  lists,
 }: {
   idPrefix: string;
   values: SubmittedValues;
   errors: TaskInputErrors | undefined;
+  lists: ListOption[];
 }) {
   return (
     <>
@@ -98,6 +104,25 @@ export function TaskFields({
             ))}
           </select>
           <FieldError message={errors?.priority} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor={`${idPrefix}-listId`} className="text-sm font-medium">
+            List
+          </label>
+          <select
+            id={`${idPrefix}-listId`}
+            name="listId"
+            defaultValue={values.listId}
+            className={controlClass}
+          >
+            <option value="">No list</option>
+            {lists.map((list) => (
+              <option key={list.id} value={String(list.id)}>
+                {list.name}
+              </option>
+            ))}
+          </select>
+          <FieldError message={errors?.listId} />
         </div>
       </div>
     </>

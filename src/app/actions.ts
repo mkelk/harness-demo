@@ -25,7 +25,7 @@ export async function addTask(
   formData: FormData,
 ): Promise<AddTaskState> {
   const db = getDb();
-  // `listId` (the hidden input on a list page) must be an existing list.
+  // The List select must name an existing list (or "" for No list).
   const listIds = listLists(db).map((list) => list.id);
   const parsed = parseTaskInput(formDataToRaw(formData), { listIds });
   if (!parsed.ok) {
