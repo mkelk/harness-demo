@@ -34,4 +34,4 @@ Mermaid block; the procedure is `_documentation_principles.md` → **Diagrams fi
 | `scheduling`   | `how/scheduling.md`   | the URL query into `page.tsx`, `listTasks` and the open ordering decision (due date, then priority, then newest), `isOverdue` with `today` from the page into the row marks, and the filter bar back to the URL                                                                   |
 | `task-flow`    | `how/tasks.md`        | form submit, server action, `formDataToRaw` and `parseTaskInput`, errors back to the form or the repository write; the row forms into `toggleTask` and `removeTask`; the edit form into `saveTask` and `redirect("/")`; `revalidatePath("/")` and the page re-reading `listTasks` |
 
-**Last documentation update:** 2026-09-17 (tick irc: how/scheduling with the scheduling diagram; how/tasks, README and testing updated for the filter bar and the second e2e file).
+**Last documentation update:** 2026-09-17 (epic Due dates and priority closed: how/scheduling added and rendered, data-model re-rendered, tasks and README updated).

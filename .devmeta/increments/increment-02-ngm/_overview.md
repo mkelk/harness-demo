@@ -1,6 +1,6 @@
 # Increment 02-ngm — Organise
 
-**Status:** NOT STARTED · **Target:** 2026-09-19
+**Status:** IN PROGRESS (epic 1 DONE 2026-09-17, epic 2 next) · **Target:** 2026-09-19
 **Engine:** synthesized ticks skill (user-level `~/.claude/skills/ticks/`, shared mode; not vendored)
 **Spec:** `docs/thoughts/2026-09-17-increment-02-organise.md` (source of truth for every epic)
 **Builds on:** increment 01-rxx (`../increment-01-rxx/completion.md`); its postmortem items are applied in the spec's first section.
@@ -41,10 +41,10 @@ lists, look at one list at a time, and narrow the list by state or by a search w
 
 Project `2xs` — the checkpoint boundary; the run stops there for human review.
 
-| Epic                   | tk id | Scope                                                                                       | Dep              |
-| ---------------------- | ----- | ------------------------------------------------------------------------------------------- | ---------------- |
-| Due dates and priority | `9jr` | migration 0002, domain fields and ordering, TaskFields, badges, filter bar, scheduling docs |                  |
-| Lists and filtering    | `isl` | migration 0003, lists domain, sidebar, list pages, list select, lists docs                  | blocked by `9jr` |
+| Epic                                                                                                                       | tk id | Scope                                                                                       | Dep              |
+| -------------------------------------------------------------------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------- | ---------------- |
+| Due dates and priority (DONE 2026-09-17, tag `02-ngm.due-dates-and-priority`, retro `ia-cycles/due-dates-and-priority.md`) | `9jr` | migration 0002, domain fields and ordering, TaskFields, badges, filter bar, scheduling docs |                  |
+| Lists and filtering                                                                                                        | `isl` | migration 0003, lists domain, sidebar, list pages, list select, lists docs                  | blocked by `9jr` |
 
 ## Definitions of done
 
