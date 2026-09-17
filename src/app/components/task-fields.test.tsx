@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { TaskFields } from "./task-fields";
 
-const empty = { title: "", notes: "", dueOn: "", priority: "2" };
+const empty = { title: "", notes: "", dueOn: "", priority: "2", listId: "" };
 
 describe("TaskFields", () => {
   it("renders Title, Notes, Due and Priority with the three priority options", () => {
@@ -35,6 +35,7 @@ describe("TaskFields", () => {
           notes: "Semi-skimmed",
           dueOn: "2026-09-30",
           priority: "1",
+          listId: "",
         }}
         errors={undefined}
       />,

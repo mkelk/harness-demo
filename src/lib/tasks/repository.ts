@@ -7,6 +7,7 @@ type TaskRow = {
   notes: string;
   due_on: string | null;
   priority: Priority;
+  list_id: number | null;
   done_at: string | null;
   created_at: string;
   updated_at: string;
@@ -19,6 +20,7 @@ function toTask(row: TaskRow): Task {
     notes: row.notes,
     dueOn: row.due_on,
     priority: row.priority,
+    listId: row.list_id,
     doneAt: row.done_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -28,9 +30,15 @@ function toTask(row: TaskRow): Task {
 /**
  * What `listTasks` returns: `show` picks the lists (`"open"`, the default,
  * leaves `done` empty; `"done"` leaves `open` empty; `"all"` fills both);
- * `q`, trimmed and non-empty, keeps only titles containing it, case-insensitive.
+ * `q`, trimmed and non-empty, keeps only titles containing it, case-insensitive;
+ * `listId`, when a number, keeps only that list's tasks (`undefined` means
+ * every task; `null` is not a filter value).
  */
-export type ListFilter = { show?: "open" | "done" | "all"; q?: string };
+export type ListFilter = {
+  show?: "open" | "done" | "all";
+  q?: string;
+  listId?: number;
+};
 
 /** Open ordering: dated first by due date, then priority, then newest. */
 const OPEN_ORDER =
@@ -51,17 +59,21 @@ function selectTasks(
   doneClause: string,
   order: string,
   q: string,
+  listId: number | undefined,
 ): Task[] {
-  const search =
-    q.length > 0
-      ? " AND lower(title) LIKE '%' || lower(?) || '%' ESCAPE '\\'"
-      : "";
-  const statement = db.prepare(
-    `SELECT * FROM tasks WHERE ${doneClause}${search} ${order}`,
-  );
-  const rows = (q.length > 0
-    ? statement.all(escapeLike(q))
-    : statement.all()) as unknown as TaskRow[];
+  const clauses = [doneClause];
+  const params: (string | number)[] = [];
+  if (listId !== undefined) {
+    clauses.push("list_id = ?");
+    params.push(listId);
+  }
+  if (q.length > 0) {
+    clauses.push("lower(title) LIKE '%' || lower(?) || '%' ESCAPE '\\'");
+    params.push(escapeLike(q));
+  }
+  const rows = db
+    .prepare(`SELECT * FROM tasks WHERE ${clauses.join(" AND ")} ${order}`)
+    .all(...params) as unknown as TaskRow[];
   return rows.map(toTask);
 }
 
@@ -75,12 +87,15 @@ export function listTasks(
 ): { open: Task[]; done: Task[] } {
   const show = filter.show ?? "open";
   const q = (filter.q ?? "").trim();
+  const listId = filter.listId;
   const open =
-    show === "done" ? [] : selectTasks(db, "done_at IS NULL", OPEN_ORDER, q);
+    show === "done"
+      ? []
+      : selectTasks(db, "done_at IS NULL", OPEN_ORDER, q, listId);
   const done =
     show === "open"
       ? []
-      : selectTasks(db, "done_at IS NOT NULL", DONE_ORDER, q);
+      : selectTasks(db, "done_at IS NOT NULL", DONE_ORDER, q, listId);
   return { open, done };
 }
 
@@ -108,9 +123,17 @@ export function createTask(db: DatabaseSync, input: TaskInput): Task {
   const now = new Date().toISOString();
   const result = db
     .prepare(
-      "INSERT INTO tasks (title, notes, due_on, priority, done_at, created_at, updated_at) VALUES (?, ?, ?, ?, NULL, ?, ?)",
+      "INSERT INTO tasks (title, notes, due_on, priority, list_id, done_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NULL, ?, ?)",
     )
-    .run(input.title, input.notes, input.dueOn, input.priority, now, now);
+    .run(
+      input.title,
+      input.notes,
+      input.dueOn,
+      input.priority,
+      input.listId,
+      now,
+      now,
+    );
   const row = db
     .prepare("SELECT * FROM tasks WHERE id = ?")
     .get(result.lastInsertRowid) as TaskRow;
@@ -126,9 +149,17 @@ export function updateTask(
   const now = new Date().toISOString();
   const result = db
     .prepare(
-      "UPDATE tasks SET title = ?, notes = ?, due_on = ?, priority = ?, updated_at = ? WHERE id = ?",
+      "UPDATE tasks SET title = ?, notes = ?, due_on = ?, priority = ?, list_id = ?, updated_at = ? WHERE id = ?",
     )
-    .run(input.title, input.notes, input.dueOn, input.priority, now, id);
+    .run(
+      input.title,
+      input.notes,
+      input.dueOn,
+      input.priority,
+      input.listId,
+      now,
+      id,
+    );
   if (result.changes === 0) return null;
   return getTask(db, id);
 }

@@ -30,24 +30,24 @@ flowchart TD
 
 ## Key entry points
 
-| Concern                                                       | Where                                                                                                                                                                         |
-| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The list page (reads on every request)                        | `src/app/page.tsx` → `Home`, `dynamic`                                                                                                                                        |
-| The edit page (`params` is a Promise; 404 on unknown id)      | `src/app/tasks/[id]/edit/page.tsx` → `EditTaskPage`, `dynamic`                                                                                                                |
-| The add server action                                         | `src/app/actions.ts` → `addTask`, `AddTaskState`                                                                                                                              |
-| The done, reopen and delete server actions                    | `src/app/actions.ts` → `toggleTask`, `removeTask`                                                                                                                             |
-| The save server action (redirects to `/`)                     | `src/app/tasks/[id]/edit/actions.ts` → `saveTask`, `SaveTaskState`                                                                                                            |
-| The checkbox that submits its form on change                  | `src/app/components/task-checkbox.tsx` → `TaskCheckbox`                                                                                                                       |
-| The add form (client, `useActionState`)                       | `src/app/components/add-task-form.tsx` → `AddTaskForm`, `AddTaskFormView`                                                                                                     |
-| The four labelled fields shared by both forms                 | `src/app/components/task-fields.tsx` → `TaskFields`, `TaskFieldValues`, `TaskFieldErrors`                                                                                     |
-| The open and done lists                                       | `src/app/components/task-list.tsx` → `TaskList`                                                                                                                               |
-| The filter bar (links and search; see `how/scheduling.md`)    | `src/app/components/filter-bar.tsx` → `FilterBar`, `Show`                                                                                                                     |
-| The edit form (client, `useActionState`)                      | `src/app/components/edit-task-form.tsx` → `EditTaskForm`, `EditTaskFormView`                                                                                                  |
-| Reading and writing tasks                                     | `src/lib/tasks/repository.ts` → `listTasks`, `ListFilter`, `isOverdue`, `getTask`, `createTask`, `updateTask`, `setDone`, `deleteTask`                                        |
-| Validation rules and messages, and id/submitted-value parsing | `src/lib/tasks/validate.ts` → `parseTaskInput`, `parseDueOn`, `parsePriority`, `PRIORITY_LABELS`, `formDataToRaw`, `parseTaskId`, `submittedValues`, `TITLE_MAX`, `NOTES_MAX` |
-| The domain types                                              | `src/lib/tasks/types.ts` → `Task`, `TaskInput`, `Priority`                                                                                                                    |
-| Component tests of the forms                                  | `src/app/components/task-fields.test.tsx`, `src/app/components/add-task-form.test.tsx`, `src/app/components/edit-task-form.test.tsx`                                          |
-| End-to-end flow on a fresh database                           | `e2e/tasks.spec.ts`                                                                                                                                                           |
+| Concern                                                       | Where                                                                                                                                                                                        |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The list page (reads on every request)                        | `src/app/page.tsx` → `Home`, `dynamic`                                                                                                                                                       |
+| The edit page (`params` is a Promise; 404 on unknown id)      | `src/app/tasks/[id]/edit/page.tsx` → `EditTaskPage`, `dynamic`                                                                                                                               |
+| The add server action                                         | `src/app/actions.ts` → `addTask`, `AddTaskState`                                                                                                                                             |
+| The done, reopen and delete server actions                    | `src/app/actions.ts` → `toggleTask`, `removeTask`                                                                                                                                            |
+| The save server action (redirects to `/`)                     | `src/app/tasks/[id]/edit/actions.ts` → `saveTask`, `SaveTaskState`                                                                                                                           |
+| The checkbox that submits its form on change                  | `src/app/components/task-checkbox.tsx` → `TaskCheckbox`                                                                                                                                      |
+| The add form (client, `useActionState`)                       | `src/app/components/add-task-form.tsx` → `AddTaskForm`, `AddTaskFormView`                                                                                                                    |
+| The four labelled fields shared by both forms                 | `src/app/components/task-fields.tsx` → `TaskFields`, `TaskFieldValues`, `TaskFieldErrors`                                                                                                    |
+| The open and done lists                                       | `src/app/components/task-list.tsx` → `TaskList`                                                                                                                                              |
+| The filter bar (links and search; see `how/scheduling.md`)    | `src/app/components/filter-bar.tsx` → `FilterBar`, `Show`                                                                                                                                    |
+| The edit form (client, `useActionState`)                      | `src/app/components/edit-task-form.tsx` → `EditTaskForm`, `EditTaskFormView`                                                                                                                 |
+| Reading and writing tasks                                     | `src/lib/tasks/repository.ts` → `listTasks`, `ListFilter`, `isOverdue`, `getTask`, `createTask`, `updateTask`, `setDone`, `deleteTask`                                                       |
+| Validation rules and messages, and id/submitted-value parsing | `src/lib/tasks/validate.ts` → `parseTaskInput`, `parseDueOn`, `parsePriority`, `parseListId`, `PRIORITY_LABELS`, `formDataToRaw`, `parseTaskId`, `submittedValues`, `TITLE_MAX`, `NOTES_MAX` |
+| The domain types                                              | `src/lib/tasks/types.ts` → `Task`, `TaskInput`, `Priority`                                                                                                                                   |
+| Component tests of the forms                                  | `src/app/components/task-fields.test.tsx`, `src/app/components/add-task-form.test.tsx`, `src/app/components/edit-task-form.test.tsx`                                                         |
+| End-to-end flow on a fresh database                           | `e2e/tasks.spec.ts`                                                                                                                                                                          |
 
 ## The page
 
@@ -144,18 +144,20 @@ read `id` (a positive integer string; anything else is ignored) and, for toggle,
 
 The validation messages, produced only in `src/lib/tasks/validate.ts`:
 
-| Field      | Rule                                                                            | Message                                   |
-| ---------- | ------------------------------------------------------------------------------- | ----------------------------------------- |
-| `title`    | trimmed, 1 to 200 characters                                                    | `Title is required.` when empty           |
-| `title`    |                                                                                 | `Title must be 200 characters or fewer.`  |
-| `notes`    | trimmed, 0 to 2000 characters                                                   | `Notes must be 2000 characters or fewer.` |
-| `dueOn`    | trimmed; empty or missing is `null`; else `YYYY-MM-DD` and a real calendar date | `Due must be a date (YYYY-MM-DD).`        |
-| `priority` | missing, `null` or `""` is `2`; else `"1"`, `"2"`, `"3"` (or the number)        | `Priority must be high, normal or low.`   |
+| Field      | Rule                                                                                                                                                                                                | Message                                   |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `title`    | trimmed, 1 to 200 characters                                                                                                                                                                        | `Title is required.` when empty           |
+| `title`    |                                                                                                                                                                                                     | `Title must be 200 characters or fewer.`  |
+| `notes`    | trimmed, 0 to 2000 characters                                                                                                                                                                       | `Notes must be 2000 characters or fewer.` |
+| `dueOn`    | trimmed; empty or missing is `null`; else `YYYY-MM-DD` and a real calendar date                                                                                                                     | `Due must be a date (YYYY-MM-DD).`        |
+| `priority` | missing, `null` or `""` is `2`; else `"1"`, `"2"`, `"3"` (or the number)                                                                                                                            | `Priority must be high, normal or low.`   |
+| `listId`   | missing, `null` or `""` is `null`; else a positive integer (`parseTaskId`) that is in `options.listIds` when `parseTaskInput(raw, { listIds })` is given them; without options any positive integer | `List does not exist.`                    |
 
 `parseTaskInput` reports every failing field at once (`TaskInputErrors` has `title`,
-`notes`, `dueOn`, `priority`). Both forms send all four fields; an empty `dueOn` stores
-`null` and the select always sends a priority, `2` unless changed. `formDataToRaw` and
-`submittedValues` read all four.
+`notes`, `dueOn`, `priority`, `listId`). Both forms send the title, notes, due and
+priority fields; an empty `dueOn` stores `null` and the select always sends a priority,
+`2` unless changed. `formDataToRaw` and `submittedValues` also read `listId` (`""` when
+the form has no such field, which parses to `null`).
 
 `getDb()` is imported only in the two `page.tsx` files and the two `actions.ts` files;
 client components receive plain data (`Task[]`) or the action function as props, so no

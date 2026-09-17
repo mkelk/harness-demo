@@ -9,7 +9,13 @@ export function AddTaskForm() {
   return <AddTaskFormView state={state} action={formAction} />;
 }
 
-const EMPTY_VALUES = { title: "", notes: "", dueOn: "", priority: "2" };
+const EMPTY_VALUES = {
+  title: "",
+  notes: "",
+  dueOn: "",
+  priority: "2",
+  listId: "",
+};
 
 /**
  * The form itself, with the action state as a prop so it can be rendered and

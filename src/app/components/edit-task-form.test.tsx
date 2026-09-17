@@ -13,6 +13,7 @@ const task: Task = {
   notes: "Semi-skimmed",
   dueOn: "2026-09-30",
   priority: 1,
+  listId: null,
   doneAt: null,
   createdAt: "2026-09-17T10:00:00.000Z",
   updatedAt: "2026-09-17T10:00:00.000Z",
@@ -44,6 +45,7 @@ describe("EditTaskFormView", () => {
             notes: "changed notes",
             dueOn: "",
             priority: "3",
+            listId: "",
           },
         }}
         action={vi.fn()}
