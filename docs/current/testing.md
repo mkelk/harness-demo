@@ -30,8 +30,10 @@ the orchestrator runs it on the integrated tree before a wave closes.
   beside `src/lib/tasks/validate.ts`).
 - Integration tests open a fresh database with `createTestDb()` from `src/lib/db/`: a
   temp file per test, migrated, removed by `close()`. Never `data/dev.db`.
-- E2E tests use `page.getByRole` and visible text, not CSS selectors, and each test
-  creates the data it needs; the e2e database is thrown away per run.
+- E2E tests use `page.getByRole`, `getByLabel` and visible text, not CSS selectors. The
+  database is new on every run (`data/e2e-<timestamp>.db`), so `e2e/tasks.spec.ts` runs as
+  one serial flow (`test.describe.configure({ mode: "serial" })`) that starts from the
+  empty state and builds on its own earlier steps.
 - The repo guards (`scripts/check-docs.test.ts`) test the checker against temp
   directories, never against the real `docs/current/`; `scripts/check-rules.test.ts`
   walks the real `src/` for `process.env` outside `src/lib/env.ts` and `node:sqlite`

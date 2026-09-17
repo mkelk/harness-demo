@@ -58,7 +58,7 @@ mechanism is `how/persistence.md`; the tables are `data-model.md`.
 
 ## Failure modes
 
-| Symptom                                                   | Cause                                         | Fix                                                                          |
-| --------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------- |
-| `pnpm build` fails on `node:sqlite` in a client component | a client component imported from `src/lib/db` | import the repository only from server code (pages, actions, route handlers) |
-| The app works in `pnpm dev` but e2e sees an empty list    | e2e uses `data/e2e.db`, not `data/dev.db`     | expected; the e2e test creates its own data                                  |
+| Symptom                                                   | Cause                                                                 | Fix                                                                          |
+| --------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `pnpm build` fails on `node:sqlite` in a client component | a client component imported from `src/lib/db`                         | import the repository only from server code (pages, actions, route handlers) |
+| The app works in `pnpm dev` but e2e sees an empty list    | e2e uses a fresh `data/e2e-<timestamp>.db` per run, not `data/dev.db` | expected; the e2e test creates its own data                                  |

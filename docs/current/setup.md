@@ -32,7 +32,7 @@ when the app opens the database; see `how/persistence.md`.
 pnpm typecheck      # tsc --noEmit
 pnpm lint           # eslint
 pnpm test           # vitest: unit + component + integration + repo guards
-pnpm test:e2e       # playwright; starts its own dev server on 3100 against data/e2e.db
+pnpm test:e2e       # playwright; starts its own dev server on 3100 against a fresh data/e2e-<timestamp>.db
 pnpm docs:check     # documentation shape and diagram stamps
 pnpm check          # everything above except e2e, then `next build`
 ```
@@ -42,10 +42,12 @@ See `testing.md` for what each tier covers.
 ## Reset the database
 
 ```bash
-rm -f data/dev.db data/dev.db-wal data/dev.db-shm data/e2e.db data/e2e.db-wal data/e2e.db-shm
+rm -f data/dev.db data/dev.db-wal data/dev.db-shm data/e2e-*.db*
 ```
 
-The next `pnpm dev` or `pnpm test:e2e` recreates the file and applies every migration.
+The next `pnpm dev` recreates `data/dev.db` and applies every migration. `pnpm test:e2e`
+creates a new `data/e2e-<timestamp>.db` on every run (`playwright.config.ts`), so the
+second pattern only clears files left by earlier runs.
 
 ## Environment variables
 

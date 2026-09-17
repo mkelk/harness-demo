@@ -21,7 +21,7 @@ accounts, no external services.
 pnpm install
 pnpm dev                 # http://localhost:3000
 pnpm check               # typecheck, lint, vitest tiers, docs:check, build
-pnpm test:e2e            # playwright, own server on :3100, throwaway data/e2e.db
+pnpm test:e2e            # playwright, own server on :3100, fresh data/e2e-<timestamp>.db per run
 ```
 
 Setup, test tiers and architecture: [`docs/current/setup.md`](docs/current/setup.md),
