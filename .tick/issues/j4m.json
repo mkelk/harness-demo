@@ -3,7 +3,7 @@
   "title": "Repairs from final review of Lists and filtering",
   "description": "Repairs routed from the epic's final review (tick wej). Apply exactly these; nothing else.\n1. Move `revalidateTaskPages()` (revalidatePath(\"/\") + revalidatePath(\"/lists/[id]\", \"page\")) into a plain module src/app/revalidate.ts (no \"use server\") and call it from every write action: src/app/actions.ts (addTask, toggleTask, removeTask), src/app/tasks/[id]/edit/actions.ts (saveTask), src/app/lists/actions.ts (createListAction, deleteListAction). Remove the old helper.\n2. docs/current/_overview.md: refresh the `data-model` page row and the `data-model` diagram row to mention the `lists` table and the `list_id` relation; the `scheduling` row: the filter bar is on both `/` and `/lists/\u003cid\u003e`.\n3. e2e/lists.spec.ts: before the \"delete list\" step, add a second task on the list page (title \"Lists: bread\") so the delete exercises ON DELETE SET NULL through the UI; after deleting assert on `/` that \"Lists: bread\" is present without a \"Lists: Groceries\" link. Extend afterAll cleanup to remove \"Lists: bread\". Fix the header comment: only tasks.spec.ts expects an empty database.\n4. docs/current/how/tasks.md: update the task-flow Mermaid block so the revalidation node reads `revalidateTaskPages(): '/' and '/lists/[id]'` (this makes the task-flow stamp stale: expected; the orchestrator re-renders); fix the first failure-mode row and the TaskList call description at the lines the review named (`lists` prop on `/`). Run pnpm docs:check: the only allowed failure is `stale task-flow`.\nRun: pnpm typecheck \u0026\u0026 pnpm lint \u0026\u0026 pnpm test \u0026\u0026 pnpm docs:check",
   "notes": "2026-09-17 16:41 - runner-state: runner=claude branch=tick/isl/j4m worktree=../.ticks-worktrees/j4m base=0d9d2c175e9225cbd4ee005fed4c29bc85e40b19 mode=solo-tick tier=balanced (repairs from review wej)",
-  "status": "in_progress",
+  "status": "closed",
   "priority": 2,
   "type": "task",
   "owner": "morten@elk.dk",
@@ -11,6 +11,7 @@
   "acceptance_criteria": "In-worktree gates pass (only 'stale task-flow' allowed); all six write actions call revalidateTaskPages from src/app/revalidate.ts; _overview.md rows refreshed; lists.spec.ts covers SET NULL via the UI with cleanup; post-merge 22 e2e pass.",
   "created_by": "morten@elk.dk",
   "created_at": "2026-09-17T14:41:43.576630776Z",
-  "updated_at": "2026-09-17T14:41:44.563424103Z",
-  "started_at": "2026-09-17T14:41:44.548967223Z"
+  "updated_at": "2026-09-17T14:49:22.659387494Z",
+  "closed_at": "2026-09-17T14:49:22.659387494Z",
+  "closed_reason": "Completed: shared revalidateTaskPages in all six actions, overview rows refreshed, SET NULL covered via UI, task-flow updated"
 }
