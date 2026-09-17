@@ -30,6 +30,7 @@ flowchart TD
 | Open a file, set PRAGMAs, migrate            | `src/lib/db/open.ts` → `openDatabase`                                                                                                   |
 | The migration ledger and runner              | `src/lib/db/migrate.ts` → `applyMigrations`, `MIGRATIONS`, `Migration`                                                                  |
 | Migration 0001, the `tasks` table            | `src/lib/db/migrations/0001_tasks.ts` → `migration0001`                                                                                 |
+| Migration 0002, `due_on` and `priority`      | `src/lib/db/migrations/0002_task_schedule.ts` → `migration0002`                                                                         |
 | The app's process-wide handle                | `src/lib/db/client.ts` → `getDb`                                                                                                        |
 | A throwaway migrated database for tests      | `src/lib/db/test-db.ts` → `createTestDb`, `TestDb`                                                                                      |
 | Public surface of the persistence layer      | `src/lib/db/index.ts` → `openDatabase`, `applyMigrations`, `MIGRATIONS`, `Migration`, `getDb`, `createTestDb`, `TestDb`, `DatabaseSync` |

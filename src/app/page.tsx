@@ -7,7 +7,7 @@ import { TaskList } from "./components/task-list";
 export const dynamic = "force-dynamic";
 
 export default function Home() {
-  const { open, done } = listTasks(getDb());
+  const { open, done } = listTasks(getDb(), { show: "all" });
   return (
     <main className="mx-auto max-w-2xl p-8">
       <header className="mb-6">

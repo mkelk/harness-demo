@@ -1,5 +1,6 @@
 import type { DatabaseSync } from "node:sqlite";
 import { migration0001 } from "./migrations/0001_tasks";
+import { migration0002 } from "./migrations/0002_task_schedule";
 
 /**
  * A schema step. Migrations are TypeScript modules exporting SQL strings (not
@@ -8,7 +9,7 @@ import { migration0001 } from "./migrations/0001_tasks";
 export type Migration = { version: number; name: string; sql: string };
 
 /** Every migration, ascending by version. Append; never edit an applied one. */
-export const MIGRATIONS: Migration[] = [migration0001];
+export const MIGRATIONS: Migration[] = [migration0001, migration0002];
 
 /**
  * Applies every migration whose version is not yet recorded in
