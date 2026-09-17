@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 960 420" role="img" aria-labelledby="data-model-title data-model-desc" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 960 440" role="img" aria-labelledby="data-model-title data-model-desc" xmlns="http://www.w3.org/2000/svg">
   <title id="data-model-title">Data model: the tasks table and the migration ledger</title>
-  <desc id="data-model-desc">Two unrelated tables. tasks has id (integer primary key, autoincrement), title (text, not null, length 1 to 200), notes (text, not null, default empty, up to 2000), done_at (text, null when open, ISO 8601 UTC when done), created_at and updated_at (text, not null, ISO 8601 UTC). schema_migrations has version (integer primary key), name (text, not null) and applied_at (text, not null, ISO 8601 UTC). An index tasks_open_idx covers done_at and created_at descending.</desc>
-  <defs><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style></defs>
+  <desc id="data-model-desc">The tasks table holds id, title, notes, done_at, created_at, updated_at, and from migration 0002 due_on (a calendar date or null) and priority (1 high, 2 normal, 3 low, default 2). schema_migrations records each applied migration by version, name and time. Indexes: tasks_open_idx on done_at and created_at, tasks_due_idx on done_at, due_on and priority.</desc>
+  <defs><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style><marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker></defs>
   <rect width="100%" height="100%" fill="#f5f5f5"/>
   <text x="40" y="52" fill="#2d3142" font-size="28" font-family="'Instrument Serif', serif">Data model</text>
-  <text x="40" y="74" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">MIGRATION 0001 · ONE SQLITE FILE</text>
-<rect x="40" y="110" width="520" height="152" rx="6" fill="#f5f5f5"/>
-<rect x="40" y="110" width="520" height="152" rx="6" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
+  <text x="40" y="74" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">MIGRATIONS 0001, 0002 · ONE SQLITE FILE</text>
+<rect x="40" y="110" width="520" height="188" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="110" width="520" height="188" rx="6" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
 <rect x="48" y="116" width="40" height="12" rx="2" fill="none" stroke="#eb6c36" stroke-opacity="0.40" stroke-width="0.8"/>
 <text x="68" y="125" fill="#eb6c36" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">TABLE</text>
 <text x="96" y="126" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">tasks</text>
@@ -30,7 +30,13 @@
 <text x="52" y="242" fill="#2d3142" font-size="9" font-family="'Geist Mono', monospace">updated_at</text>
 <text x="190" y="242" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">TEXT</text>
 <text x="260" y="242" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">NOT NULL, set on every write</text>
-<text x="52" y="272" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">INDEX tasks_open_idx (done_at, created_at DESC)</text>
+<text x="52" y="260" fill="#2d3142" font-size="9" font-family="'Geist Mono', monospace">due_on</text>
+<text x="190" y="260" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">TEXT</text>
+<text x="260" y="260" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">NULL when undated, else YYYY-MM-DD (0002)</text>
+<text x="52" y="278" fill="#2d3142" font-size="9" font-family="'Geist Mono', monospace">priority</text>
+<text x="190" y="278" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">INTEGER</text>
+<text x="260" y="278" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">NOT NULL DEFAULT 2: 1 High, 2 Normal, 3 Low (0002)</text>
+<text x="52" y="312" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">INDEXES tasks_open_idx (done_at, created_at DESC) · tasks_due_idx (done_at, due_on, priority)</text>
 <rect x="620" y="110" width="300" height="98" rx="6" fill="#f5f5f5"/>
 <rect x="620" y="110" width="300" height="98" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
 <rect x="628" y="116" width="40" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
@@ -46,11 +52,10 @@
 <text x="632" y="188" fill="#2d3142" font-size="9" font-family="'Geist Mono', monospace">applied_at</text>
 <text x="770" y="188" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">TEXT</text>
 <text x="840" y="188" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">ISO 8601 UTC</text>
-<text x="632" y="220" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">LEDGER: 1 = tasks</text>
-<text x="40" y="330" fill="#2d3142" font-size="14" font-style="italic" font-family="'Instrument Serif', serif">No relationship between the two: one is the data, the other is the record of how the data got its shape.</text>
-  <line x1="30" y1="372" x2="930" y2="372" stroke="#2d3142" stroke-opacity="0.10" stroke-width="0.8"/>
-  <text x="30" y="390" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
-  <text x="110" y="390" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"># PRIMARY KEY</text>
-  <rect x="230" y="381" width="30" height="12" rx="2" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
-  <text x="268" y="390" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">THE DATA THE APP ORDERS: open by created_at DESC, done by done_at DESC</text>
+<text x="632" y="222" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">LEDGER: 1 tasks · 2 task_schedule</text>
+  <line x1="30" y1="392" x2="930" y2="392" stroke="#2d3142" stroke-opacity="0.10" stroke-width="0.8"/>
+  <text x="30" y="410" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+  <text x="110" y="410" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"># PRIMARY KEY</text>
+  <rect x="290" y="401" width="30" height="12" rx="2" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
+  <text x="328" y="410" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">OPEN ORDER: due_on ASC (undated last), priority ASC, created_at DESC</text>
 </svg>
