@@ -15,6 +15,7 @@ here, it does not exist as living documentation (`_documentation_principles.md`)
 | [testing](testing.md)                                       | 2    | The five test tiers, their commands, where each runs during a dmtix run                                                   |
 | [how/architecture](how/architecture.md)                     | 2    | The module boundaries: routes and actions, the domain and persistence layer, the SQLite file, and the repo guards         |
 | [how/persistence](how/persistence.md)                       | 2    | How the SQLite file is opened, PRAGMAs, the migration ledger and runner, `getDb` for the app and `createTestDb` for tests |
+| [how/tasks](how/tasks.md)                                   | 2    | The task list page and its forms: server actions, validation messages, ordering, revalidation, the e2e flow               |
 | [data-model](data-model.md)                                 | 3    | The `tasks` and `schema_migrations` tables column by column, the index, the ordering rules, the migration ledger          |
 | [standards/testing-strategy](standards/testing-strategy.md) | 2    | What each tier proves, the temp-database rule, test-first, and the guard tests that hold the docs                         |
 
@@ -24,10 +25,11 @@ Rendered SVGs live in `diagrams/`, one per `<!-- diagram: <id> -->` Mermaid bloc
 page under `docs/current/`. `pnpm docs:check` fails when a stamp no longer matches the
 Mermaid block; the procedure is `_documentation_principles.md` → **Diagrams first**.
 
-| Id             | Lives in              | Shows                                                                                                                                       |
-| -------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `architecture` | `how/architecture.md` | the browser, the App Router routes and server actions, `src/lib`, the SQLite file, and the test tiers around them                           |
-| `persistence`  | `how/persistence.md`  | `openDatabase`: ensure directory, PRAGMAs, `applyMigrations` against `schema_migrations`, the handle; `getDb` and `createTestDb` as callers |
-| `data-model`   | `data-model.md`       | ER view of `tasks` and `schema_migrations` with their columns and constraints                                                               |
+| Id             | Lives in              | Shows                                                                                                                                                                     |
+| -------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `architecture` | `how/architecture.md` | the browser, the App Router routes and server actions, `src/lib`, the SQLite file, and the test tiers around them                                                         |
+| `persistence`  | `how/persistence.md`  | `openDatabase`: ensure directory, PRAGMAs, `applyMigrations` against `schema_migrations`, the handle; `getDb` and `createTestDb` as callers                               |
+| `data-model`   | `data-model.md`       | ER view of `tasks` and `schema_migrations` with their columns and constraints                                                                                             |
+| `task-flow`    | `how/tasks.md`        | form submit, server action, `formDataToRaw` and `parseTaskInput`, errors back to the form or the repository write, `revalidatePath("/")`, the page re-reading `listTasks` |
 
-**Last documentation update:** 2026-09-17 (epic Persistence foundation closed: how/persistence and data-model added and rendered; testing and architecture pages corrected).
+**Last documentation update:** 2026-09-17 (epic Task list, tick swe: how/tasks added with the task-flow diagram; e2e database path is now per run).
