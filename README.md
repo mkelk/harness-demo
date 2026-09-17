@@ -11,6 +11,22 @@ deliberately boring so that the method is what you read.
   `.devmeta/increments/*/`.
 - **Why it looks like this:** [`docs/thoughts/`](docs/thoughts/), dated.
 
+## Where the interesting parts are
+
+Most of what this repo demonstrates lives in four dot-directories and `docs/`, not in
+`src/`. Read them in this order:
+
+| Directory                          | What is in it                                                                                                                                                                                                                                                                    | Start with                                                                                                                                                                                                       |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`.tick/`](.tick/)                 | The ticks tracker (every tick, epic and project of both increments, committed), the standing method contract, the engine's inferred execution profile, and the learnings file that grew over four retros                                                                         | [`config.md`](.tick/config.md), [`learnings.md`](.tick/learnings.md), [`profile.md`](.tick/profile.md), then `tk roadmap`                                                                                        |
+| [`.devmeta/`](.devmeta/)           | The narrative records: one directory per increment with its overview, a retro per epic (`ia-cycles/`) and a completion report; the resolution anchor; the project history                                                                                                        | [`project-history.md`](.devmeta/project-history.md), then [`increments/increment-01-rxx/_overview.md`](.devmeta/increments/increment-01-rxx/_overview.md)                                                        |
+| [`.claude/`](.claude/)             | The vendored skills that ran the whole thing: `dmtix` (the method's three doors), `ticks` (the engine: planning, waves, worktrees, reviews, retros) and `diagram-design` (the renderer behind the docs), each with a `PROVENANCE.md`; the project command for rendering diagrams | [`skills/dmtix/SKILL.md`](.claude/skills/dmtix/SKILL.md), [`skills/ticks/SKILL.md`](.claude/skills/ticks/SKILL.md), [`skills/ticks/references/agent-runner.md`](.claude/skills/ticks/references/agent-runner.md) |
+| [`docs/current/`](docs/current/)   | The living documentation the run maintained: tiered pages, six rendered diagrams with their stamps, and the spec the docs are held to                                                                                                                                            | [`_documentation_principles.md`](docs/current/_documentation_principles.md), [`_overview.md`](docs/current/_overview.md), [`how/architecture.md`](docs/current/how/architecture.md)                              |
+| [`docs/thoughts/`](docs/thoughts/) | Dated thinking: why the repo exists, the roadmap, testing and docs as gates, and the spec each increment was scoped from                                                                                                                                                         | [`2026-09-17-why-this-repo-exists.md`](docs/thoughts/2026-09-17-why-this-repo-exists.md)                                                                                                                         |
+
+`scripts/check-docs.mjs` and `scripts/check-rules.test.ts` are the two guards the repo
+holds itself to; `src/`, `e2e/` and the config files are an ordinary Next.js app.
+
 ## The app
 
 Tasks with a title and notes, a done state, a due date, a priority and a list. Open tasks
