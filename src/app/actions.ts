@@ -3,31 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db";
 import { createTask, deleteTask, setDone } from "@/lib/tasks/repository";
-import { formDataToRaw, parseTaskInput } from "@/lib/tasks/validate";
+import {
+  formDataToRaw,
+  parseTaskId,
+  parseTaskInput,
+  submittedValues,
+} from "@/lib/tasks/validate";
 
 export type AddTaskState = {
   errors?: { title?: string; notes?: string };
   values?: { title: string; notes: string };
-  ok?: boolean;
   /** Changes on every successful add so the form can remount and clear. */
   nonce?: number;
 };
-
-function submitted(formData: FormData): { title: string; notes: string } {
-  const raw = formDataToRaw(formData);
-  return {
-    title: typeof raw.title === "string" ? raw.title : "",
-    notes: typeof raw.notes === "string" ? raw.notes : "",
-  };
-}
-
-/** The `id` hidden input as a positive integer, or `null` when it is not one. */
-function taskId(formData: FormData): number | null {
-  const raw = formData.get("id");
-  if (typeof raw !== "string" || !/^\d+$/.test(raw)) return null;
-  const id = Number(raw);
-  return Number.isSafeInteger(id) && id > 0 ? id : null;
-}
 
 export async function addTask(
   prevState: AddTaskState,
@@ -35,11 +23,11 @@ export async function addTask(
 ): Promise<AddTaskState> {
   const parsed = parseTaskInput(formDataToRaw(formData));
   if (!parsed.ok) {
-    return { errors: parsed.errors, values: submitted(formData) };
+    return { errors: parsed.errors, values: submittedValues(formData) };
   }
   createTask(getDb(), parsed.value);
   revalidatePath("/");
-  return { ok: true, nonce: Date.now() };
+  return { nonce: Date.now() };
 }
 
 /**
@@ -47,7 +35,7 @@ export async function addTask(
  * or unknown `id` is ignored; the page is revalidated either way.
  */
 export async function toggleTask(formData: FormData): Promise<void> {
-  const id = taskId(formData);
+  const id = parseTaskId(formData.get("id"));
   if (id !== null) {
     setDone(getDb(), id, formData.get("done") === "true");
   }
@@ -56,7 +44,7 @@ export async function toggleTask(formData: FormData): Promise<void> {
 
 /** Deletes a task. An invalid or unknown `id` is ignored. */
 export async function removeTask(formData: FormData): Promise<void> {
-  const id = taskId(formData);
+  const id = parseTaskId(formData.get("id"));
   if (id !== null) {
     deleteTask(getDb(), id);
   }

@@ -47,3 +47,29 @@ export function formDataToRaw(formData: FormData): {
     notes: formData.get("notes"),
   };
 }
+
+/**
+ * Parses a hidden `id` input value: a string or number that is a positive
+ * safe integer. Anything else (including "0", "-1", "1.5", non-numeric
+ * strings, `null` or missing values) is `null`.
+ */
+export function parseTaskId(raw: unknown): number | null {
+  if (typeof raw === "number") {
+    return Number.isSafeInteger(raw) && raw > 0 ? raw : null;
+  }
+  if (typeof raw !== "string" || !/^\d+$/.test(raw)) return null;
+  const id = Number(raw);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
+
+/** The title and notes as submitted, non-strings coerced to `""`. */
+export function submittedValues(formData: FormData): {
+  title: string;
+  notes: string;
+} {
+  const raw = formDataToRaw(formData);
+  return {
+    title: toStringOrEmpty(raw.title),
+    notes: toStringOrEmpty(raw.notes),
+  };
+}
