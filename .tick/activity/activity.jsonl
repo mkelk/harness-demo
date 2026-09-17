@@ -2,3 +2,8 @@
 {"ts":"2026-09-17T12:54:37.854749534Z","tick":"azj","action":"create","actor":"morten@elk.dk","epic":"m2h","data":{"priority":2,"title":"Persistence foundation","type":"epic"}}
 {"ts":"2026-09-17T12:54:37.866020397Z","tick":"5qb","action":"create","actor":"morten@elk.dk","epic":"m2h","data":{"priority":2,"title":"Task list","type":"epic"}}
 {"ts":"2026-09-17T12:55:03.810156831Z","tick":"m2h","action":"note","actor":"morten@elk.dk","data":{"note":"2026-09-17 14:55 - base-branch: 2026-09-17-increment-01 (tk 0.29 only stamps --base-branch on epics; both epics carry it)","title":"Task basics"}}
+{"ts":"2026-09-17T12:57:07.604722832Z","tick":"w74","action":"create","actor":"claude:orchestrator","epic":"azj","data":{"priority":2,"title":"SQLite open, migrations, test db and tasks table","type":"task"}}
+{"ts":"2026-09-17T12:57:07.618420552Z","tick":"4ny","action":"create","actor":"claude:orchestrator","epic":"azj","data":{"priority":2,"title":"Task repository over the tasks table","type":"task"}}
+{"ts":"2026-09-17T12:57:07.630329776Z","tick":"86w","action":"create","actor":"claude:orchestrator","epic":"azj","data":{"priority":2,"title":"Task input validation","type":"task"}}
+{"ts":"2026-09-17T12:57:07.641223154Z","tick":"me4","action":"create","actor":"claude:orchestrator","epic":"azj","data":{"priority":2,"title":"Final review of Persistence foundation diff","type":"task"}}
+{"ts":"2026-09-17T12:57:07.651949388Z","tick":"rt1","action":"create","actor":"claude:orchestrator","epic":"azj","data":{"priority":2,"title":"Close out Persistence foundation: run epic retro, then flesh out the next feasible epic into ticks","type":"task"}}
