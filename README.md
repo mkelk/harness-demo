@@ -13,9 +13,10 @@ deliberately boring so that the method is what you read.
 
 ## The app
 
-Tasks with a title and notes, a done state, and (from increment 02) a due date, a
-priority and a list. One SQLite file at `DATABASE_PATH` (default `data/dev.db`), no
-accounts, no external services.
+Tasks with a title and notes, a done state, a due date, a priority and a list. Open tasks
+are ordered by due date, priority and age; overdue ones are marked; a filter bar narrows
+the page by state or a search word; lists get their own page. One SQLite file at
+`DATABASE_PATH` (default `data/dev.db`), no accounts, no external services.
 
 ```bash
 pnpm install
@@ -143,8 +144,16 @@ Set in `.tick/config.md` → `## Documentation`, specified in
 5. `git log --first-parent main` and `git tag`: one merge per increment, one tag per
    epic close (`<increment-id>.<epic-slug>`).
 
-## Roadmap
+## What was built, increment by increment
 
-See [`docs/thoughts/2026-09-17-product-roadmap.md`](docs/thoughts/2026-09-17-product-roadmap.md).
-Increments 01 and 02 are built in this repo; 03 and 04 are written down to show where the
-product would go and what was left out on purpose.
+| Increment          | Spec                                                                                                           | Records                                                                                      | Epics (tags)                                                  | Result                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 01-rxx Task basics | [`docs/thoughts/2026-09-17-increment-01-task-basics.md`](docs/thoughts/2026-09-17-increment-01-task-basics.md) | [`.devmeta/increments/increment-01-rxx/`](.devmeta/increments/increment-01-rxx/_overview.md) | `01-rxx.persistence-foundation`, `01-rxx.task-list`           | SQLite layer, tasks domain, list and edit pages; 55 Vitest, 10 e2e |
+| 02-ngm Organise    | [`docs/thoughts/2026-09-17-increment-02-organise.md`](docs/thoughts/2026-09-17-increment-02-organise.md)       | [`.devmeta/increments/increment-02-ngm/`](.devmeta/increments/increment-02-ngm/_overview.md) | `02-ngm.due-dates-and-priority`, `02-ngm.lists-and-filtering` | due dates, priority, ordering, filters, lists; 165 Vitest, 21 e2e  |
+
+Each increment ran as `/dmtix start` → `/dmtix go` → checkpoint → `git merge --no-ff` to
+`main`. Every epic has a retro under `ia-cycles/`, every increment a `completion.md` whose
+postmortems fed the next spec. `.tick/learnings.md` grew from nothing to 74 lines over four
+retros. Increments 03 and 04 exist only in
+[`docs/thoughts/2026-09-17-product-roadmap.md`](docs/thoughts/2026-09-17-product-roadmap.md),
+to show where the product would go and what was left out on purpose.
