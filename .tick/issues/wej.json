@@ -2,17 +2,17 @@
   "id": "wej",
   "title": "Final review of Lists and filtering diff",
   "description": "Read-only frontier review of the epic diff from tag 02-ngm.due-dates-and-priority to HEAD against the spec's Epic 2 sections. Axes: spec compliance (sidebar, counts, messages, scoping, ON DELETE SET NULL, 404), correctness (FK enforcement, revalidation of both paths, redirect after delete, listIds validation), security (id parsing), test quality, doc accuracy, drift.",
-  "status": "in_progress",
+  "status": "open",
   "priority": 2,
   "type": "task",
   "owner": "morten@elk.dk",
   "blocked_by": [
-    "sxg"
+    "sxg",
+    "j4m"
   ],
   "parent": "isl",
   "role": "review",
   "created_by": "morten@elk.dk",
   "created_at": "2026-09-17T14:15:21.001570212Z",
-  "updated_at": "2026-09-17T14:37:19.787051864Z",
-  "started_at": "2026-09-17T14:37:19.7870499Z"
+  "updated_at": "2026-09-17T14:41:43.602929947Z"
 }
