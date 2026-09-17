@@ -5,6 +5,7 @@ export type TaskInputErrors = {
   notes?: string;
   dueOn?: string;
   priority?: string;
+  listId?: string;
 };
 
 export type ParseResult =
@@ -21,6 +22,7 @@ export const PRIORITY_LABELS: Record<Priority, string> = {
 
 const DUE_ON_ERROR = "Due must be a date (YYYY-MM-DD).";
 const PRIORITY_ERROR = "Priority must be high, normal or low.";
+const LIST_ID_ERROR = "List does not exist.";
 
 function toStringOrEmpty(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -64,16 +66,45 @@ export function parsePriority(
   return { ok: false, error: PRIORITY_ERROR };
 }
 
-export function parseTaskInput(raw: {
-  title?: unknown;
-  notes?: unknown;
-  dueOn?: unknown;
-  priority?: unknown;
-}): ParseResult {
+/**
+ * A list field: `undefined`, `null` or `""` is `null` ("No list"); otherwise
+ * the value must parse as an id (`parseTaskId`) and, when `listIds` is given,
+ * be one of them. Without `listIds` any positive id is accepted.
+ */
+export function parseListId(
+  raw: unknown,
+  listIds?: number[],
+): { ok: true; value: number | null } | { ok: false; error: string } {
+  if (raw === undefined || raw === null || raw === "") {
+    return { ok: true, value: null };
+  }
+  const id = parseTaskId(raw);
+  if (id === null || (listIds !== undefined && !listIds.includes(id))) {
+    return { ok: false, error: LIST_ID_ERROR };
+  }
+  return { ok: true, value: id };
+}
+
+export type ParseTaskInputOptions = {
+  /** The ids that exist; when given, `listId` must be one of them. */
+  listIds?: number[];
+};
+
+export function parseTaskInput(
+  raw: {
+    title?: unknown;
+    notes?: unknown;
+    dueOn?: unknown;
+    priority?: unknown;
+    listId?: unknown;
+  },
+  options: ParseTaskInputOptions = {},
+): ParseResult {
   const title = toStringOrEmpty(raw.title).trim();
   const notes = toStringOrEmpty(raw.notes).trim();
   const dueOn = parseDueOn(raw.dueOn);
   const priority = parsePriority(raw.priority);
+  const listId = parseListId(raw.listId, options.listIds);
 
   const errors: TaskInputErrors = {};
 
@@ -89,14 +120,26 @@ export function parseTaskInput(raw: {
 
   if (!dueOn.ok) errors.dueOn = dueOn.error;
   if (!priority.ok) errors.priority = priority.error;
+  if (!listId.ok) errors.listId = listId.error;
 
-  if (!dueOn.ok || !priority.ok || Object.keys(errors).length > 0) {
+  if (
+    !dueOn.ok ||
+    !priority.ok ||
+    !listId.ok ||
+    Object.keys(errors).length > 0
+  ) {
     return { ok: false, errors };
   }
 
   return {
     ok: true,
-    value: { title, notes, dueOn: dueOn.value, priority: priority.value },
+    value: {
+      title,
+      notes,
+      dueOn: dueOn.value,
+      priority: priority.value,
+      listId: listId.value,
+    },
   };
 }
 
@@ -105,12 +148,14 @@ export function formDataToRaw(formData: FormData): {
   notes: unknown;
   dueOn: unknown;
   priority: unknown;
+  listId: unknown;
 } {
   return {
     title: formData.get("title"),
     notes: formData.get("notes"),
     dueOn: formData.get("dueOn"),
     priority: formData.get("priority"),
+    listId: formData.get("listId"),
   };
 }
 
@@ -134,6 +179,7 @@ export function submittedValues(formData: FormData): {
   notes: string;
   dueOn: string;
   priority: string;
+  listId: string;
 } {
   const raw = formDataToRaw(formData);
   return {
@@ -141,11 +187,12 @@ export function submittedValues(formData: FormData): {
     notes: toStringOrEmpty(raw.notes),
     dueOn: toStringOrEmpty(raw.dueOn),
     priority: toStringOrEmpty(raw.priority),
+    listId: toStringOrEmpty(raw.listId),
   };
 }
 
 /**
- * The four fields as strings, the way a form submits them. The single source
+ * The five fields as strings, the way a form submits them. The single source
  * for this shape, so a new field is added in one place.
  */
 export type SubmittedValues = ReturnType<typeof submittedValues>;

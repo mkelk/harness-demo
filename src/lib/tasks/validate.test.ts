@@ -88,6 +88,67 @@ describe("parseTaskInput", () => {
         notes: "",
         dueOn: null,
         priority: 2,
+        listId: null,
+      });
+    }
+  });
+
+  it("rejects a listId that is not in options.listIds", () => {
+    const result = parseTaskInput(
+      { title: "Buy milk", listId: "3" },
+      { listIds: [1, 2] },
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors).toEqual({ listId: "List does not exist." });
+    }
+  });
+
+  it("accepts a listId that is in options.listIds", () => {
+    const result = parseTaskInput(
+      { title: "Buy milk", listId: "2" },
+      { listIds: [1, 2] },
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.listId).toBe(2);
+  });
+
+  it.each([[""], [undefined], [null]])(
+    "treats listId %p as null even with listIds given",
+    (raw) => {
+      const result = parseTaskInput(
+        { title: "Buy milk", listId: raw },
+        { listIds: [1, 2] },
+      );
+      expect(result.ok).toBe(true);
+      if (result.ok) expect(result.value.listId).toBeNull();
+    },
+  );
+
+  it("accepts any positive listId when no options are given", () => {
+    const result = parseTaskInput({ title: "Buy milk", listId: "9" });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.listId).toBe(9);
+  });
+
+  it.each([["0"], ["-1"], ["abc"], ["1.5"]])(
+    "rejects a malformed listId %p",
+    (raw) => {
+      const result = parseTaskInput({ title: "Buy milk", listId: raw });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.errors.listId).toBe("List does not exist.");
+      }
+    },
+  );
+
+  it("reports a listId error alongside title errors", () => {
+    const result = parseTaskInput({ title: "", listId: "7" }, { listIds: [] });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors).toEqual({
+        title: "Title is required.",
+        listId: "List does not exist.",
       });
     }
   });
@@ -200,18 +261,20 @@ describe("PRIORITY_LABELS", () => {
 });
 
 describe("formDataToRaw", () => {
-  it("reads title, notes, dueOn and priority from FormData", () => {
+  it("reads title, notes, dueOn, priority and listId from FormData", () => {
     const formData = new FormData();
     formData.append("title", "Buy milk");
     formData.append("notes", "2%");
     formData.append("dueOn", "2026-09-30");
     formData.append("priority", "1");
+    formData.append("listId", "4");
 
     expect(formDataToRaw(formData)).toEqual({
       title: "Buy milk",
       notes: "2%",
       dueOn: "2026-09-30",
       priority: "1",
+      listId: "4",
     });
   });
 
@@ -224,6 +287,7 @@ describe("formDataToRaw", () => {
       notes: null,
       dueOn: null,
       priority: null,
+      listId: null,
     });
 
     const result = parseTaskInput(raw);
@@ -252,18 +316,20 @@ describe("parseTaskId", () => {
 });
 
 describe("submittedValues", () => {
-  it("reads title, notes, dueOn and priority as submitted", () => {
+  it("reads title, notes, dueOn, priority and listId as submitted", () => {
     const formData = new FormData();
     formData.append("title", "Buy milk");
     formData.append("notes", "2%");
     formData.append("dueOn", "2026-02-30");
     formData.append("priority", "4");
+    formData.append("listId", "3");
 
     expect(submittedValues(formData)).toEqual({
       title: "Buy milk",
       notes: "2%",
       dueOn: "2026-02-30",
       priority: "4",
+      listId: "3",
     });
   });
 
@@ -275,6 +341,7 @@ describe("submittedValues", () => {
       notes: "",
       dueOn: "",
       priority: "",
+      listId: "",
     });
   });
 });

@@ -8,6 +8,8 @@ export type Task = {
   /** A calendar date `YYYY-MM-DD`, or `null` when undated. */
   dueOn: string | null;
   priority: Priority;
+  /** The owning list's id, or `null` for "No list". */
+  listId: number | null;
   doneAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -18,4 +20,5 @@ export type TaskInput = {
   notes: string;
   dueOn: string | null;
   priority: Priority;
+  listId: number | null;
 };

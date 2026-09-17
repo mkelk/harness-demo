@@ -12,6 +12,7 @@ function task(over: Partial<Task> & { id: number; title: string }): Task {
     notes: "",
     dueOn: null,
     priority: 2,
+    listId: null,
     doneAt: null,
     createdAt: "2026-09-17T10:00:00.000Z",
     updatedAt: "2026-09-17T10:00:00.000Z",

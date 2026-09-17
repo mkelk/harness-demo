@@ -9,9 +9,16 @@ import {
   setDone,
   updateTask,
 } from "./repository";
+import { createList } from "@/lib/lists/repository";
 import type { TaskInput } from "./types";
 
-const base: TaskInput = { title: "", notes: "", dueOn: null, priority: 2 };
+const base: TaskInput = {
+  title: "",
+  notes: "",
+  dueOn: null,
+  priority: 2,
+  listId: null,
+};
 
 let testDb: TestDb | undefined;
 
@@ -89,6 +96,42 @@ describe("listTasks", () => {
     expect(listTasks(d, { q: "   " }).open).toHaveLength(2);
   });
 
+  it("listId returns only that list's open and done tasks; undefined returns all", () => {
+    const d = db();
+    const groceries = createList(d, "Groceries");
+    const other = createList(d, "Other");
+    createTask(d, { ...base, title: "Milk", listId: groceries.id });
+    const bread = createTask(d, {
+      ...base,
+      title: "Bread",
+      listId: groceries.id,
+    });
+    createTask(d, { ...base, title: "Elsewhere", listId: other.id });
+    const unlisted = createTask(d, { ...base, title: "Unlisted" });
+    setDone(d, bread.id, true);
+    setDone(d, unlisted.id, true);
+    const scoped = listTasks(d, { show: "all", listId: groceries.id });
+    expect(scoped.open.map((t) => t.title)).toEqual(["Milk"]);
+    expect(scoped.done.map((t) => t.title)).toEqual(["Bread"]);
+    const all = listTasks(d, { show: "all" });
+    expect(all.open.map((t) => t.title)).toEqual(["Elsewhere", "Milk"]);
+    expect(all.done.map((t) => t.title)).toEqual(["Unlisted", "Bread"]);
+    expect(listTasks(d, { listId: 999 })).toEqual({ open: [], done: [] });
+  });
+
+  it("listId combines with q", () => {
+    const d = db();
+    const groceries = createList(d, "Groceries");
+    createTask(d, { ...base, title: "Oat milk", listId: groceries.id });
+    createTask(d, { ...base, title: "Bread", listId: groceries.id });
+    createTask(d, { ...base, title: "Milk elsewhere" });
+    expect(
+      listTasks(d, { listId: groceries.id, q: "milk" }).open.map(
+        (t) => t.title,
+      ),
+    ).toEqual(["Oat milk"]);
+  });
+
   it("treats %, _ and \\ in q as literal characters, not LIKE wildcards", () => {
     const d = db();
     createTask(d, { ...base, title: "100% done" });
@@ -153,7 +196,23 @@ describe("createTask", () => {
     });
     expect(task.dueOn).toBe("2026-09-30");
     expect(task.priority).toBe(1);
+    expect(task.listId).toBeNull();
     expect(getTask(d, task.id)).toEqual(task);
+  });
+
+  it("stores listId", () => {
+    const d = db();
+    const list = createList(d, "Groceries");
+    const task = createTask(d, { ...base, title: "Milk", listId: list.id });
+    expect(task.listId).toBe(list.id);
+    expect(getTask(d, task.id)?.listId).toBe(list.id);
+  });
+
+  it("throws when listId points at no list (FOREIGN KEY constraint)", () => {
+    const d = db();
+    expect(() => createTask(d, { ...base, title: "Milk", listId: 42 })).toThrow(
+      /FOREIGN KEY constraint/,
+    );
   });
 
   it("orders undated open tasks of equal priority by created_at, not id", () => {
@@ -246,6 +305,20 @@ describe("updateTask", () => {
     expect(updated?.priority).toBe(2);
     expect(updated!.updatedAt > updated!.createdAt).toBe(true);
     expect(getTask(d, task.id)).toEqual(updated);
+  });
+
+  it("sets and clears listId", () => {
+    const d = db();
+    const list = createList(d, "Groceries");
+    const task = createTask(d, { ...base, title: "Buy milk" });
+    const moved = updateTask(d, task.id, {
+      ...base,
+      title: "Buy milk",
+      listId: list.id,
+    });
+    expect(moved?.listId).toBe(list.id);
+    const cleared = updateTask(d, task.id, { ...base, title: "Buy milk" });
+    expect(cleared?.listId).toBeNull();
   });
 
   it("changes dueOn and priority", () => {

@@ -30,6 +30,7 @@ export function EditTaskFormView({
     notes: task.notes,
     dueOn: task.dueOn ?? "",
     priority: String(task.priority),
+    listId: task.listId === null ? "" : String(task.listId),
   };
   return (
     <form
