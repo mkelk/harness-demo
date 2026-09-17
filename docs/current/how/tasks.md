@@ -41,6 +41,7 @@ flowchart TD
 | The add form (client, `useActionState`)                       | `src/app/components/add-task-form.tsx` → `AddTaskForm`, `AddTaskFormView`                                                                                                     |
 | The four labelled fields shared by both forms                 | `src/app/components/task-fields.tsx` → `TaskFields`, `TaskFieldValues`, `TaskFieldErrors`                                                                                     |
 | The open and done lists                                       | `src/app/components/task-list.tsx` → `TaskList`                                                                                                                               |
+| The filter bar (links and search; see `how/scheduling.md`)    | `src/app/components/filter-bar.tsx` → `FilterBar`, `Show`                                                                                                                     |
 | The edit form (client, `useActionState`)                      | `src/app/components/edit-task-form.tsx` → `EditTaskForm`, `EditTaskFormView`                                                                                                  |
 | Reading and writing tasks                                     | `src/lib/tasks/repository.ts` → `listTasks`, `ListFilter`, `isOverdue`, `getTask`, `createTask`, `updateTask`, `setDone`, `deleteTask`                                        |
 | Validation rules and messages, and id/submitted-value parsing | `src/lib/tasks/validate.ts` → `parseTaskInput`, `parseDueOn`, `parsePriority`, `PRIORITY_LABELS`, `formDataToRaw`, `parseTaskId`, `submittedValues`, `TITLE_MAX`, `NOTES_MAX` |
@@ -50,18 +51,23 @@ flowchart TD
 
 ## The page
 
-`src/app/page.tsx` is a server component. It calls `listTasks(getDb(), { show: "all" })` and renders
-`<AddTaskForm />` followed by `<TaskList open={open} done={done} />`. It exports
-`dynamic = "force-dynamic"`, so Next.js never prerenders it and every request reads the
-database. The page keeps a single `h1` reading `harness-demo` (the smoke test asserts it).
+`src/app/page.tsx` is a server component. It awaits `searchParams` (`show`, `q`), calls
+`listTasks(getDb(), { show: show ?? "all", q })` and renders `<AddTaskForm />`, then
+`<FilterBar show={show} q={q} />` (the `Open`, `Done`, `All` links and the `Search`
+form), then `<TaskList open={open} done={done} show={show} q={q} today={today} />`.
+Which sections render per `show`, the search, the ordering, the badges and the
+`Overdue` mark are in `how/scheduling.md`; this page describes the default view (`/`
+with no query). It exports `dynamic = "force-dynamic"`, so Next.js never prerenders it
+and every request reads the database. The page keeps a single `h1` reading
+`harness-demo` (the smoke test asserts it).
 
 `TaskList` renders:
 
-| State                        | Markup                                                                                                                                                                                                                                                                 |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| no tasks at all              | one paragraph: `No tasks yet. Add the first one above.`                                                                                                                                                                                                                |
-| open tasks                   | `h2` `Open (N)`, then a `ul` with accessible name `Open tasks`; each `li`: an unchecked checkbox `Mark done: <title>`, the title, the first line of the notes in muted text when notes are non-empty, an `Edit` link to `/tasks/<id>/edit`, a `Delete: <title>` button |
-| done tasks (only when N > 0) | `h2` `Done (N)`, then a `ul` with accessible name `Done tasks`; each `li`: a checked checkbox `Reopen: <title>`, the title with Tailwind `line-through`, a `Delete: <title>` button                                                                                    |
+| State                        | Markup                                                                                                                                                                                                                                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| no tasks at all              | one paragraph: `No tasks yet. Add the first one above.`                                                                                                                                                                                                                                                 |
+| open tasks                   | `h2` `Open (N)`, then a `ul` with accessible name `Open tasks`; each `li`: an unchecked checkbox `Mark done: <title>`, the title, the marks (`how/scheduling.md`), the first line of the notes in muted text when notes are non-empty, an `Edit` link to `/tasks/<id>/edit`, a `Delete: <title>` button |
+| done tasks (only when N > 0) | `h2` `Done (N)`, then a `ul` with accessible name `Done tasks`; each `li`: a checked checkbox `Reopen: <title>`, the title with Tailwind `line-through`, the marks, a `Delete: <title>` button                                                                                                          |
 
 Ordering comes from the repository, not the page: `open` is
 `(due_on IS NULL) ASC, due_on ASC, priority ASC, created_at DESC, id DESC` (dated tasks

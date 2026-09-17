@@ -13,7 +13,9 @@ external services. It runs with `pnpm dev` on port 3000 and stores data in `data
 On `/` you add a task (title, optional notes, optional due date, priority High, Normal or
 Low), see the open list (dated tasks first by due date, then priority, then newest), mark a
 task done, reopen it, and delete it; `/tasks/<id>/edit` changes the same four fields;
-see `how/tasks.md`.
+see `how/tasks.md`. Rows mark High and Low priority, the due date and `Overdue`; the
+filter bar narrows `/` to open, done or all tasks (`?show=`) and by a title word (`?q=`);
+see `how/scheduling.md`.
 
 ## Key numbers
 
@@ -36,6 +38,7 @@ see `how/tasks.md`.
 | 2    | [how/architecture](how/architecture.md)                     | you are about to change anything and need the module boundaries                              |
 | 2    | [how/persistence](how/persistence.md)                       | you are adding a migration, opening the database, or writing an integration test             |
 | 2    | [how/tasks](how/tasks.md)                                   | you are changing the task list or edit page, a form, a server action or a validation message |
+| 2    | [how/scheduling](how/scheduling.md)                         | you are changing due dates, priority, the overdue mark, the open ordering or the filter bar  |
 | 3    | [data-model](data-model.md)                                 | you need a table, a column, a constraint or an ordering rule                                 |
 | 2    | [standards/testing-strategy](standards/testing-strategy.md) | you need to know what each tier proves and the rules tests follow                            |
 | -    | [_documentation_principles](_documentation_principles.md)   | you are writing documentation                                                                |
