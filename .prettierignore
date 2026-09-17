@@ -4,3 +4,5 @@ pnpm-lock.yaml
 docs/current/diagrams/*.svg
 playwright-report
 test-results
+.tick/issues
+.tick/logs

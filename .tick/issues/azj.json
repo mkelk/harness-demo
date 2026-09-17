@@ -2,7 +2,7 @@
   "id": "azj",
   "title": "Persistence foundation",
   "description": "SQLite persistence through node:sqlite: openDatabase with WAL and migrations, applyMigrations with a schema_migrations table, migration 0001 (tasks table), getDb singleton, createTestDb temp-file helper, the tasks domain (types, parseTaskInput validation, repository: listTasks/getTask/createTask/updateTask/setDone/deleteTask), a guard test for process.env and node:sqlite import boundaries, and the pages docs/current/how/persistence.md (diagram: persistence) and docs/current/data-model.md (diagram: data-model). Expected shape: wave 1 solo foundation tick (open/migrate/test-db/migration/guard/docs, also discovers the worktree provisioning recipe), wave 2 repository (integration tests) in parallel with validation (unit tests). Source of truth: docs/thoughts/2026-09-17-increment-01-task-basics.md sections 'Under the hood', 'Table tasks', 'Domain', 'Guards added', 'Documentation added' and 'Definitions of done → Epic 1'.",
-  "status": "open",
+  "status": "closed",
   "priority": 2,
   "type": "epic",
   "owner": "morten@elk.dk",
@@ -11,5 +11,7 @@
   "base_branch": "2026-09-17-increment-01",
   "created_by": "morten@elk.dk",
   "created_at": "2026-09-17T12:54:37.854320629Z",
-  "updated_at": "2026-09-17T12:54:37.884743079Z"
+  "updated_at": "2026-09-17T13:16:36.289034834Z",
+  "closed_at": "2026-09-17T13:16:36.289034834Z",
+  "closed_reason": "Completed: SQLite persistence layer, tasks domain (validation, repository), rules guard, persistence + data-model docs with diagrams; 40 tests, coverage 91.9%; retro in .devmeta/increments/increment-01-rxx/ia-cycles/persistence-foundation.md"
 }
