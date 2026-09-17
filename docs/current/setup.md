@@ -21,8 +21,10 @@ pnpm install
 pnpm dev            # http://localhost:3000
 ```
 
-The database file is created on first use at `DATABASE_PATH` (default `data/dev.db`,
-gitignored). Migrations run automatically when the app opens the database.
+The database file and its parent directory are created on first use at `DATABASE_PATH`
+(default `data/dev.db`, gitignored). Pending migrations (`MIGRATIONS` in
+`src/lib/db/migrate.ts`, recorded in the `schema_migrations` table) run automatically
+when the app opens the database; see `how/persistence.md`.
 
 ## Test
 
@@ -40,7 +42,7 @@ See `testing.md` for what each tier covers.
 ## Reset the database
 
 ```bash
-rm -f data/dev.db data/e2e.db
+rm -f data/dev.db data/dev.db-wal data/dev.db-shm data/e2e.db data/e2e.db-wal data/e2e.db-shm
 ```
 
 The next `pnpm dev` or `pnpm test:e2e` recreates the file and applies every migration.
