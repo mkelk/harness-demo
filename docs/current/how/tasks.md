@@ -32,7 +32,7 @@ flowchart TD
 
 | Concern                                                       | Where                                                                                                                                                                                        |
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The list page (reads on every request)                        | `src/app/page.tsx` → `Home`, `dynamic`                                                                                                                                                       |
+| The list page (reads on every request)                        | `src/app/page.tsx` → `Home`, `dynamic`; the body shared with `/lists/<id>` is `src/app/components/task-page.tsx` → `TaskPage` (see `how/lists.md`)                                           |
 | The edit page (`params` is a Promise; 404 on unknown id)      | `src/app/tasks/[id]/edit/page.tsx` → `EditTaskPage`, `dynamic`                                                                                                                               |
 | The add server action                                         | `src/app/actions.ts` → `addTask`, `AddTaskState`                                                                                                                                             |
 | The done, reopen and delete server actions                    | `src/app/actions.ts` → `toggleTask`, `removeTask`                                                                                                                                            |
@@ -51,10 +51,14 @@ flowchart TD
 
 ## The page
 
-`src/app/page.tsx` is a server component. It awaits `searchParams` (`show`, `q`), calls
-`listTasks(getDb(), { show: show ?? "all", q })` and renders `<AddTaskForm />`, then
-`<FilterBar show={show} q={q} />` (the `Open`, `Done`, `All` links and the `Search`
-form), then `<TaskList open={open} done={done} show={show} q={q} today={today} />`.
+`src/app/page.tsx` is a server component. It awaits `searchParams`, reads `show` and
+`q` with `parseFilterQuery`, and renders `<TaskPage list={null} show q today />`.
+`TaskPage` (`src/app/components/task-page.tsx`, shared with `/lists/<id>`, see
+`how/lists.md`) calls `listTasks(getDb(), { show: show ?? "all", q, listId })` and
+renders the sidebar (`ListsNav`), the `h2` heading (`All tasks` on `/`), `<AddTaskForm />`,
+then `<FilterBar show={show} q={q} basePath="/" />` (the `Open`, `Done`, `All` links and
+the `Search` form), then
+`<TaskList open={open} done={done} show={show} q={q} today={today} />`.
 Which sections render per `show`, the search, the ordering, the badges and the
 `Overdue` mark are in `how/scheduling.md`; this page describes the default view (`/`
 with no query). It exports `dynamic = "force-dynamic"`, so Next.js never prerenders it
@@ -126,17 +130,19 @@ The accessible names come from `aria-label` and are exactly `Mark done: <title>`
 its server action. `toggleTask(formData)` and `removeTask(formData)` return `void`: they
 read `id` (a positive integer string; anything else is ignored) and, for toggle, `done`
 (`"true"` means mark done, anything else means reopen), call the repository once and then
-`revalidatePath("/")`. An unknown `id` is a silent no-op: `setDone` returns `null` and
+`revalidateTaskPages()` (`revalidatePath("/")` and `revalidatePath("/lists/[id]", "page")`). An unknown `id` is a silent no-op: `setDone` returns `null` and
 `deleteTask` returns `false`, and the page re-renders from the database either way.
 
 ## The add server action
 
 `addTask(prevState, formData)` in `src/app/actions.ts` (`"use server"`):
 
-1. `parseTaskInput(formDataToRaw(formData))`.
+1. `parseTaskInput(formDataToRaw(formData), { listIds })`, with `listIds` from
+   `listLists(getDb())`, so the hidden `listId` a list page sends must be an existing list.
 2. On `ok: false`: return `{ errors, values }` where `values` are the submitted strings
    (non-string form values become `""`). Nothing is written.
-3. On `ok: true`: `createTask(getDb(), value)`, then `revalidatePath("/")`, then return
+3. On `ok: true`: `createTask(getDb(), value)`, then `revalidatePath("/")` and
+   `revalidatePath("/lists/[id]", "page")` (`revalidateTaskPages`), then return
    `{ nonce: Date.now() }`.
 
 `AddTaskState` is `{ errors?: TaskInputErrors; values?: { title, notes, dueOn, priority }; nonce? }`
@@ -159,7 +165,7 @@ priority fields; an empty `dueOn` stores `null` and the select always sends a pr
 `2` unless changed. `formDataToRaw` and `submittedValues` also read `listId` (`""` when
 the form has no such field, which parses to `null`).
 
-`getDb()` is imported only in the two `page.tsx` files and the two `actions.ts` files;
+`getDb()` is imported only in the `page.tsx` files, `TaskPage` and the `actions.ts` files;
 client components receive plain data (`Task[]`) or the action function as props, so no
 `"use client"` file imports `@/lib/db`.
 

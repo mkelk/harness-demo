@@ -29,19 +29,20 @@ see `how/scheduling.md`.
 
 ## Document map
 
-| Tier | Document                                                    | Read it when                                                                                 |
-| ---- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| 1    | [README](README.md)                                         | you want the shape of the app in two minutes                                                 |
-| 1    | [_overview](_overview.md)                                   | you want every page and every diagram listed                                                 |
-| 2    | [setup](setup.md)                                           | you are installing, running or resetting the app                                             |
-| 2    | [testing](testing.md)                                       | you are writing or running tests                                                             |
-| 2    | [how/architecture](how/architecture.md)                     | you are about to change anything and need the module boundaries                              |
-| 2    | [how/persistence](how/persistence.md)                       | you are adding a migration, opening the database, or writing an integration test             |
-| 2    | [how/tasks](how/tasks.md)                                   | you are changing the task list or edit page, a form, a server action or a validation message |
-| 2    | [how/scheduling](how/scheduling.md)                         | you are changing due dates, priority, the overdue mark, the open ordering or the filter bar  |
-| 3    | [data-model](data-model.md)                                 | you need a table, a column, a constraint or an ordering rule                                 |
-| 2    | [standards/testing-strategy](standards/testing-strategy.md) | you need to know what each tier proves and the rules tests follow                            |
-| -    | [_documentation_principles](_documentation_principles.md)   | you are writing documentation                                                                |
+| Tier | Document                                                    | Read it when                                                                                  |
+| ---- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 1    | [README](README.md)                                         | you want the shape of the app in two minutes                                                  |
+| 1    | [_overview](_overview.md)                                   | you want every page and every diagram listed                                                  |
+| 2    | [setup](setup.md)                                           | you are installing, running or resetting the app                                              |
+| 2    | [testing](testing.md)                                       | you are writing or running tests                                                              |
+| 2    | [how/architecture](how/architecture.md)                     | you are about to change anything and need the module boundaries                               |
+| 2    | [how/persistence](how/persistence.md)                       | you are adding a migration, opening the database, or writing an integration test              |
+| 2    | [how/tasks](how/tasks.md)                                   | you are changing the task list or edit page, a form, a server action or a validation message  |
+| 2    | [how/scheduling](how/scheduling.md)                         | you are changing due dates, priority, the overdue mark, the open ordering or the filter bar   |
+| 2    | [how/lists](how/lists.md)                                   | you are changing the sidebar, a list page, creating or deleting a list, or the list name rule |
+| 3    | [data-model](data-model.md)                                 | you need a table, a column, a constraint or an ordering rule                                  |
+| 2    | [standards/testing-strategy](standards/testing-strategy.md) | you need to know what each tier proves and the rules tests follow                             |
+| -    | [_documentation_principles](_documentation_principles.md)   | you are writing documentation                                                                 |
 
 Pages the first increments add (configuration, troubleshooting) appear here and in
 `_overview.md` when they land; a page not listed does not exist.

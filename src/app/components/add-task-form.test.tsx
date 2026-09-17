@@ -63,3 +63,24 @@ describe("AddTaskFormView", () => {
     expect(screen.getByLabelText("Title")).toHaveValue("");
   });
 });
+
+describe("AddTaskFormView on a list page", () => {
+  it("sends the current list id as a hidden listId input", () => {
+    render(<AddTaskFormView state={{}} action={vi.fn()} listId={7} />);
+    const form = screen
+      .getByRole("button", { name: "Add task" })
+      .closest("form");
+    expect(form?.querySelector('input[name="listId"]')).toHaveAttribute(
+      "value",
+      "7",
+    );
+  });
+
+  it("sends no listId input on the unscoped page", () => {
+    render(<AddTaskFormView state={{}} action={vi.fn()} />);
+    const form = screen
+      .getByRole("button", { name: "Add task" })
+      .closest("form");
+    expect(form?.querySelector('input[name="listId"]')).toBeNull();
+  });
+});
