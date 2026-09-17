@@ -4,6 +4,7 @@ import {
   NOTES_MAX,
   parseDueOn,
   parsePriority,
+  parseFilterQuery,
   parseTaskId,
   parseTaskInput,
   PRIORITY_LABELS,
@@ -343,5 +344,28 @@ describe("submittedValues", () => {
       priority: "",
       listId: "",
     });
+  });
+});
+
+describe("parseFilterQuery", () => {
+  it("reads show and a trimmed q from the search params", () => {
+    expect(parseFilterQuery({ show: "done", q: "  milk " })).toEqual({
+      show: "done",
+      q: "milk",
+    });
+  });
+
+  it("treats a missing or unknown show as undefined and a missing q as empty", () => {
+    expect(parseFilterQuery({})).toEqual({ show: undefined, q: "" });
+    expect(parseFilterQuery({ show: "later" })).toEqual({
+      show: undefined,
+      q: "",
+    });
+  });
+
+  it("uses the first value of a repeated parameter", () => {
+    expect(parseFilterQuery({ show: ["open", "done"], q: ["a", "b"] })).toEqual(
+      { show: "open", q: "a" },
+    );
   });
 });

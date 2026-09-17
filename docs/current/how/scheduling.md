@@ -56,7 +56,8 @@ the badge text.
 
 ## The query parameters
 
-`src/app/page.tsx` awaits `searchParams` (a Promise in Next.js 16) and reads:
+`src/app/page.tsx` awaits `searchParams` (a Promise in Next.js 16) and reads, through
+`parseFilterQuery` in `src/lib/tasks/validate.ts`:
 
 | Parameter | Values                | Missing or other value                                                                 | Effect                                                 |
 | --------- | --------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------ |
@@ -93,12 +94,13 @@ heading with a count, even at zero.
 
 ## The filter bar
 
-`FilterBar({ show, q })` is a server component inside `<nav aria-label="Filters">`:
+`FilterBar({ show, q, basePath })` is a server component inside `<nav aria-label="Filters">`;
+`basePath` is `/` (the default) or `/lists/<id>` on a list page (`how/lists.md`):
 
-| Control                     | Markup                                                                                                                         |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| links `Open`, `Done`, `All` | `href="/?show=<value>"` plus `&q=<q>` when `q` is non-empty; the current one has `aria-current="page"`                         |
-| search form                 | `<form method="get" action="/">`, hidden `show` (only when `show` is set), `input name="q"` labelled `Search`, button `Search` |
+| Control                     | Markup                                                                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| links `Open`, `Done`, `All` | `href="<basePath>?show=<value>"` plus `&q=<q>` when `q` is non-empty; the current one has `aria-current="page"`                         |
+| search form                 | `<form method="get" action="<basePath>">`, hidden `show` (only when `show` is set), `input name="q"` labelled `Search`, button `Search` |
 
 Submitting the form is a plain GET navigation, so the page re-reads the database with
 the new `q`; no server action is involved.

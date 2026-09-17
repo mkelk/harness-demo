@@ -5,6 +5,7 @@ import type { Task } from "@/lib/tasks/types";
 import { PRIORITY_LABELS } from "@/lib/tasks/validate";
 import type { Show } from "./filter-bar";
 import { TaskCheckbox } from "./task-checkbox";
+import type { ListOption } from "./task-fields";
 
 function firstLine(notes: string): string {
   return notes.split(/\r?\n/, 1)[0] ?? "";
@@ -42,9 +43,18 @@ function ToggleForm({ task, done }: { task: Task; done: boolean }) {
 
 /**
  * The marks after a title: a High or Low badge (Normal shows nothing), the
- * due date, and Overdue for an open task due before `today`.
+ * due date, Overdue for an open task due before `today`, and the list name
+ * linked to `/lists/<id>` when `listName` is given.
  */
-function TaskMarks({ task, today }: { task: Task; today: string }) {
+function TaskMarks({
+  task,
+  today,
+  listName,
+}: {
+  task: Task;
+  today: string;
+  listName: string | undefined;
+}) {
   return (
     <>
       {task.priority !== 2 ? (
@@ -66,6 +76,14 @@ function TaskMarks({ task, today }: { task: Task; today: string }) {
           Overdue
         </span>
       ) : null}
+      {listName !== undefined && task.listId !== null ? (
+        <Link
+          href={`/lists/${task.listId}`}
+          className="text-xs text-blue-700 underline"
+        >
+          {listName}
+        </Link>
+      ) : null}
     </>
   );
 }
@@ -77,7 +95,8 @@ function TaskMarks({ task, today }: { task: Task; today: string }) {
  * rows, Done, which is what the page did before the filter bar existed. The
  * empty-state paragraph appears only when `show` is `undefined` or `"all"`,
  * without a search and without rows; `"open"` and `"done"` always render
- * their heading with a count, `Open (0)` or `Done (0)` included.
+ * their heading with a count, `Open (0)` or `Done (0)` included. `lists`
+ * (given on `/`, not on a list page) lets a row link its list by name.
  */
 export function TaskList({
   open,
@@ -85,13 +104,18 @@ export function TaskList({
   show,
   q,
   today,
+  lists,
 }: {
   open: Task[];
   done: Task[];
   show: Show | undefined;
   q: string;
   today: string;
+  lists?: ListOption[];
 }) {
+  const listNames = new Map(lists?.map((list) => [list.id, list.name]));
+  const listName = (task: Task) =>
+    task.listId === null ? undefined : listNames.get(task.listId);
   const showOpen = show !== "done";
   const showDone =
     show === "done" ||
@@ -126,7 +150,11 @@ export function TaskList({
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span>{task.title}</span>
-                    <TaskMarks task={task} today={today} />
+                    <TaskMarks
+                      task={task}
+                      today={today}
+                      listName={listName(task)}
+                    />
                   </div>
                   {task.notes ? (
                     <div className="text-sm text-zinc-500">
@@ -162,7 +190,11 @@ export function TaskList({
                   <span className="text-zinc-500 line-through">
                     {task.title}
                   </span>
-                  <TaskMarks task={task} today={today} />
+                  <TaskMarks
+                    task={task}
+                    today={today}
+                    listName={listName(task)}
+                  />
                 </div>
                 <DeleteButton task={task} />
               </li>

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db";
+import { listLists } from "@/lib/lists/repository";
 import { createTask, deleteTask, setDone } from "@/lib/tasks/repository";
 import {
   formDataToRaw,
@@ -23,13 +24,22 @@ export async function addTask(
   prevState: AddTaskState,
   formData: FormData,
 ): Promise<AddTaskState> {
-  const parsed = parseTaskInput(formDataToRaw(formData));
+  const db = getDb();
+  // The List select must name an existing list (or "" for No list).
+  const listIds = listLists(db).map((list) => list.id);
+  const parsed = parseTaskInput(formDataToRaw(formData), { listIds });
   if (!parsed.ok) {
     return { errors: parsed.errors, values: submittedValues(formData) };
   }
-  createTask(getDb(), parsed.value);
-  revalidatePath("/");
+  createTask(db, parsed.value);
+  revalidateTaskPages();
   return { nonce: Date.now() };
+}
+
+/** Every page that renders task rows: `/` and each `/lists/<id>`. */
+function revalidateTaskPages(): void {
+  revalidatePath("/");
+  revalidatePath("/lists/[id]", "page");
 }
 
 /**
@@ -41,7 +51,7 @@ export async function toggleTask(formData: FormData): Promise<void> {
   if (id !== null) {
     setDone(getDb(), id, formData.get("done") === "true");
   }
-  revalidatePath("/");
+  revalidateTaskPages();
 }
 
 /** Deletes a task. An invalid or unknown `id` is ignored. */
@@ -50,5 +60,5 @@ export async function removeTask(formData: FormData): Promise<void> {
   if (id !== null) {
     deleteTask(getDb(), id);
   }
-  revalidatePath("/");
+  revalidateTaskPages();
 }

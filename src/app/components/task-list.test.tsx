@@ -151,4 +151,56 @@ describe("TaskList sections", () => {
       ),
     ).toHaveLength(0);
   });
+
+  it("links the list name to /lists/<id> when lists are given and the task has one", () => {
+    const lists = [{ id: 4, name: "Groceries" }];
+    render(
+      <TaskList
+        open={[
+          task({ id: 1, title: "Milk", listId: 4 }),
+          task({ id: 2, title: "Bread" }),
+        ]}
+        done={[
+          task({
+            id: 3,
+            title: "Eggs",
+            listId: 4,
+            doneAt: "2026-09-17T11:00:00.000Z",
+          }),
+        ]}
+        show={undefined}
+        q=""
+        today={TODAY}
+        lists={lists}
+      />,
+    );
+    const rows = within(
+      screen.getByRole("list", { name: "Open tasks" }),
+    ).getAllByRole("listitem");
+    expect(
+      within(rows[0]).getByRole("link", { name: "Groceries" }),
+    ).toHaveAttribute("href", "/lists/4");
+    expect(
+      within(rows[1]).queryByRole("link", { name: "Groceries" }),
+    ).toBeNull();
+    const doneRow = within(
+      screen.getByRole("list", { name: "Done tasks" }),
+    ).getByRole("listitem");
+    expect(
+      within(doneRow).getByRole("link", { name: "Groceries" }),
+    ).toHaveAttribute("href", "/lists/4");
+  });
+
+  it("shows no list link on a list page (no lists given)", () => {
+    render(
+      <TaskList
+        open={[task({ id: 1, title: "Milk", listId: 4 })]}
+        done={[]}
+        show={undefined}
+        q=""
+        today={TODAY}
+      />,
+    );
+    expect(screen.queryByRole("link", { name: "Groceries" })).toBeNull();
+  });
 });

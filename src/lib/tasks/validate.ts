@@ -196,3 +196,27 @@ export function submittedValues(formData: FormData): {
  * for this shape, so a new field is added in one place.
  */
 export type SubmittedValues = ReturnType<typeof submittedValues>;
+
+export type FilterQuery = {
+  /** `show=open|done|all` as given; anything else, including no value, is `undefined`. */
+  show: "open" | "done" | "all" | undefined;
+  /** `q`, trimmed; `""` when missing. */
+  q: string;
+};
+
+/**
+ * The list page's query parameters (`show`, `q`) from Next.js `searchParams`.
+ * A repeated parameter uses its first value.
+ */
+export function parseFilterQuery(
+  params: Record<string, string | string[] | undefined>,
+): FilterQuery {
+  const first = (value: string | string[] | undefined): string =>
+    (Array.isArray(value) ? value[0] : value) ?? "";
+  const show = first(params.show);
+  return {
+    show:
+      show === "open" || show === "done" || show === "all" ? show : undefined,
+    q: first(params.q).trim(),
+  };
+}

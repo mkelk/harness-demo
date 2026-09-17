@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { TaskFields } from "./task-fields";
 
@@ -6,7 +6,14 @@ const empty = { title: "", notes: "", dueOn: "", priority: "2", listId: "" };
 
 describe("TaskFields", () => {
   it("renders Title, Notes, Due and Priority with the three priority options", () => {
-    render(<TaskFields idPrefix="add" values={empty} errors={undefined} />);
+    render(
+      <TaskFields
+        idPrefix="add"
+        values={empty}
+        errors={undefined}
+        lists={[]}
+      />,
+    );
     expect(screen.getByLabelText("Title")).toHaveAttribute("name", "title");
     expect(screen.getByLabelText("Notes")).toHaveAttribute("name", "notes");
     const due = screen.getByLabelText("Due");
@@ -15,7 +22,7 @@ describe("TaskFields", () => {
     const priority = screen.getByLabelText("Priority");
     expect(priority).toHaveAttribute("name", "priority");
     expect(priority).toHaveValue("2");
-    const options = screen.getAllByRole("option");
+    const options = within(priority).getAllByRole("option");
     expect(
       options.map((o) => [o.getAttribute("value"), o.textContent]),
     ).toEqual([
@@ -38,6 +45,7 @@ describe("TaskFields", () => {
           listId: "",
         }}
         errors={undefined}
+        lists={[]}
       />,
     );
     expect(screen.getByLabelText("Title")).toHaveValue("Buy milk");
@@ -56,7 +64,9 @@ describe("TaskFields", () => {
           notes: "Notes too long.",
           dueOn: "Due must be a date (YYYY-MM-DD).",
           priority: "Priority must be high, normal or low.",
+          listId: "List does not exist.",
         }}
+        lists={[]}
       />,
     );
     expect(screen.getAllByRole("alert").map((a) => a.textContent)).toEqual([
@@ -64,12 +74,72 @@ describe("TaskFields", () => {
       "Notes too long.",
       "Due must be a date (YYYY-MM-DD).",
       "Priority must be high, normal or low.",
+      "List does not exist.",
     ]);
   });
 
   it("uses idPrefix so two forms on one page never share ids", () => {
-    render(<TaskFields idPrefix="add" values={empty} errors={undefined} />);
+    render(
+      <TaskFields
+        idPrefix="add"
+        values={empty}
+        errors={undefined}
+        lists={[]}
+      />,
+    );
     expect(screen.getByLabelText("Title")).toHaveAttribute("id", "add-title");
     expect(screen.getByLabelText("Due")).toHaveAttribute("id", "add-dueOn");
+  });
+
+  const lists = [
+    { id: 1, name: "Groceries" },
+    { id: 2, name: "Work" },
+  ];
+
+  it("renders the List select with No list first and one option per list", () => {
+    render(
+      <TaskFields
+        idPrefix="add"
+        values={empty}
+        errors={undefined}
+        lists={lists}
+      />,
+    );
+    const select = screen.getByLabelText("List", { exact: true });
+    expect(select).toHaveAttribute("name", "listId");
+    expect(select).toHaveValue("");
+    expect(
+      within(select)
+        .getAllByRole("option")
+        .map((o) => [o.getAttribute("value"), o.textContent]),
+    ).toEqual([
+      ["", "No list"],
+      ["1", "Groceries"],
+      ["2", "Work"],
+    ]);
+  });
+
+  it("selects the list named by values.listId", () => {
+    render(
+      <TaskFields
+        idPrefix="edit"
+        values={{ ...empty, listId: "2" }}
+        errors={undefined}
+        lists={lists}
+      />,
+    );
+    expect(screen.getByLabelText("List", { exact: true })).toHaveValue("2");
+  });
+
+  it("shows the listId error under the List select", () => {
+    render(
+      <TaskFields
+        idPrefix="add"
+        values={empty}
+        errors={{ listId: "List does not exist." }}
+        lists={lists}
+      />,
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent("List does not exist.");
   });
 });

@@ -51,3 +51,16 @@ describe("FilterBar", () => {
     expect(form?.querySelector('input[name="show"]')).toBeNull();
   });
 });
+
+describe("FilterBar on a list page", () => {
+  it("keeps the /lists/<id> base path in the links and the form action", () => {
+    render(<FilterBar show="open" q="milk" basePath="/lists/7" />);
+    expect(screen.getByRole("link", { name: "Done" })).toHaveAttribute(
+      "href",
+      "/lists/7?show=done&q=milk",
+    );
+    expect(
+      screen.getByRole("button", { name: "Search" }).closest("form"),
+    ).toHaveAttribute("action", "/lists/7");
+  });
+});

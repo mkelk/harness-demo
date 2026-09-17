@@ -32,14 +32,15 @@ flowchart TD
 
 | Concern                                                       | Where                                                                                                                                                                                        |
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The list page (reads on every request)                        | `src/app/page.tsx` → `Home`, `dynamic`                                                                                                                                                       |
+| The list page (reads on every request)                        | `src/app/page.tsx` → `Home`, `dynamic`; the body shared with `/lists/<id>` is `src/app/components/task-page.tsx` → `TaskPage` (see `how/lists.md`)                                           |
 | The edit page (`params` is a Promise; 404 on unknown id)      | `src/app/tasks/[id]/edit/page.tsx` → `EditTaskPage`, `dynamic`                                                                                                                               |
 | The add server action                                         | `src/app/actions.ts` → `addTask`, `AddTaskState`                                                                                                                                             |
 | The done, reopen and delete server actions                    | `src/app/actions.ts` → `toggleTask`, `removeTask`                                                                                                                                            |
 | The save server action (redirects to `/`)                     | `src/app/tasks/[id]/edit/actions.ts` → `saveTask`, `SaveTaskState`                                                                                                                           |
 | The checkbox that submits its form on change                  | `src/app/components/task-checkbox.tsx` → `TaskCheckbox`                                                                                                                                      |
 | The add form (client, `useActionState`)                       | `src/app/components/add-task-form.tsx` → `AddTaskForm`, `AddTaskFormView`                                                                                                                    |
-| The four labelled fields shared by both forms                 | `src/app/components/task-fields.tsx` → `TaskFields`, `TaskFieldValues`, `TaskFieldErrors`                                                                                                    |
+| The five labelled fields shared by both forms                 | `src/app/components/task-fields.tsx` → `TaskFields`, `ListOption`                                                                                                                            |
+| Lists, the sidebar and the List select's data                 | `how/lists.md`                                                                                                                                                                               |
 | The open and done lists                                       | `src/app/components/task-list.tsx` → `TaskList`                                                                                                                                              |
 | The filter bar (links and search; see `how/scheduling.md`)    | `src/app/components/filter-bar.tsx` → `FilterBar`, `Show`                                                                                                                                    |
 | The edit form (client, `useActionState`)                      | `src/app/components/edit-task-form.tsx` → `EditTaskForm`, `EditTaskFormView`                                                                                                                 |
@@ -51,10 +52,14 @@ flowchart TD
 
 ## The page
 
-`src/app/page.tsx` is a server component. It awaits `searchParams` (`show`, `q`), calls
-`listTasks(getDb(), { show: show ?? "all", q })` and renders `<AddTaskForm />`, then
-`<FilterBar show={show} q={q} />` (the `Open`, `Done`, `All` links and the `Search`
-form), then `<TaskList open={open} done={done} show={show} q={q} today={today} />`.
+`src/app/page.tsx` is a server component. It awaits `searchParams`, reads `show` and
+`q` with `parseFilterQuery`, and renders `<TaskPage list={null} show q today />`.
+`TaskPage` (`src/app/components/task-page.tsx`, shared with `/lists/<id>`, see
+`how/lists.md`) calls `listTasks(getDb(), { show: show ?? "all", q, listId })` and
+renders the sidebar (`ListsNav`), the `h2` heading (`All tasks` on `/`), `<AddTaskForm lists />`,
+then `<FilterBar show={show} q={q} basePath="/" />` (the `Open`, `Done`, `All` links and
+the `Search` form), then
+`<TaskList open={open} done={done} show={show} q={q} today={today} />`.
 Which sections render per `show`, the search, the ordering, the badges and the
 `Overdue` mark are in `how/scheduling.md`; this page describes the default view (`/`
 with no query). It exports `dynamic = "force-dynamic"`, so Next.js never prerenders it
@@ -78,26 +83,30 @@ first by due date, then High before Normal before Low, then newest first), `done
 
 `AddTaskForm` is a `"use client"` component: `useActionState(addTask, {})` gives it the
 current `AddTaskState` and a form action; it renders `AddTaskFormView` with both. The view
-is a plain `<form action={formAction}>` holding `<TaskFields idPrefix="add" />` and the
-submit button.
+is a plain `<form action={formAction}>` holding `<TaskFields idPrefix="add" lists />` and
+the submit button. `lists` (`ListOption[]`, `{ id, name }`) and the optional `listId` (the
+current list on `/lists/<id>`) come from `TaskPage`.
 
-`TaskFields({ idPrefix, values, errors })` in `src/app/components/task-fields.tsx` is the
-one place the task controls are written; the add and edit forms both render it, so a new
-field is added there once. It has no server imports (only `PRIORITY_LABELS` from
+`TaskFields({ idPrefix, values, errors, lists })` in `src/app/components/task-fields.tsx`
+is the one place the task controls are written; the add and edit forms both render it, so
+a new field is added there once. It has no server imports (only `PRIORITY_LABELS` from
 `src/lib/tasks/validate.ts`), so it renders inside `"use client"` forms. `idPrefix`
 (`add` or `edit`) prefixes every control id, so two forms on one page never share one.
 
-| Field    | Control                                                                                         | Accessible name |
-| -------- | ----------------------------------------------------------------------------------------------- | --------------- |
-| title    | `input name="title"`, placeholder `What needs doing?`                                           | `Title`         |
-| notes    | `textarea name="notes"`                                                                         | `Notes`         |
-| dueOn    | `input type="date" name="dueOn"`, value `YYYY-MM-DD` or empty                                   | `Due`           |
-| priority | `select name="priority"`, options `1` High, `2` Normal, `3` Low (labels from `PRIORITY_LABELS`) | `Priority`      |
-| submit   | `button` `Add task` (add form) or `Save` (edit form)                                            |                 |
+| Field    | Control                                                                                                  | Accessible name |
+| -------- | -------------------------------------------------------------------------------------------------------- | --------------- |
+| title    | `input name="title"`, placeholder `What needs doing?`                                                    | `Title`         |
+| notes    | `textarea name="notes"`                                                                                  | `Notes`         |
+| dueOn    | `input type="date" name="dueOn"`, value `YYYY-MM-DD` or empty                                            | `Due`           |
+| priority | `select name="priority"`, options `1` High, `2` Normal, `3` Low (labels from `PRIORITY_LABELS`)          | `Priority`      |
+| listId   | `select name="listId"`, option `""` `No list` then one option per entry of `lists` (value id, text name) | `List`          |
+| submit   | `button` `Add task` (add form) or `Save` (edit form)                                                     |                 |
 
-`values` is `{ title, notes, dueOn, priority }` as strings, exactly the shape
+`values` is `{ title, notes, dueOn, priority, listId }` as strings, exactly the shape
 `submittedValues` returns; the add form passes `state.values` or, before any submit,
-`{ title: "", notes: "", dueOn: "", priority: "2" }` (so Normal is preselected).
+`{ title: "", notes: "", dueOn: "", priority: "2", listId }` with `listId` `""` on `/`
+and the current list's id on `/lists/<id>` (so Normal and the page's list are
+preselected).
 `defaultValue` of each control comes from those values, so after a validation error the
 submitted input stays in every field. The form element is keyed on `state.nonce`; a
 successful add returns a new nonce, React remounts the form, and all fields are back to
@@ -126,20 +135,22 @@ The accessible names come from `aria-label` and are exactly `Mark done: <title>`
 its server action. `toggleTask(formData)` and `removeTask(formData)` return `void`: they
 read `id` (a positive integer string; anything else is ignored) and, for toggle, `done`
 (`"true"` means mark done, anything else means reopen), call the repository once and then
-`revalidatePath("/")`. An unknown `id` is a silent no-op: `setDone` returns `null` and
+`revalidateTaskPages()` (`revalidatePath("/")` and `revalidatePath("/lists/[id]", "page")`). An unknown `id` is a silent no-op: `setDone` returns `null` and
 `deleteTask` returns `false`, and the page re-renders from the database either way.
 
 ## The add server action
 
 `addTask(prevState, formData)` in `src/app/actions.ts` (`"use server"`):
 
-1. `parseTaskInput(formDataToRaw(formData))`.
+1. `parseTaskInput(formDataToRaw(formData), { listIds })`, with `listIds` from
+   `listLists(getDb())`, so the List select's value must be an existing list or `""`.
 2. On `ok: false`: return `{ errors, values }` where `values` are the submitted strings
    (non-string form values become `""`). Nothing is written.
-3. On `ok: true`: `createTask(getDb(), value)`, then `revalidatePath("/")`, then return
+3. On `ok: true`: `createTask(getDb(), value)`, then `revalidatePath("/")` and
+   `revalidatePath("/lists/[id]", "page")` (`revalidateTaskPages`), then return
    `{ nonce: Date.now() }`.
 
-`AddTaskState` is `{ errors?: TaskInputErrors; values?: { title, notes, dueOn, priority }; nonce? }`
+`AddTaskState` is `{ errors?: TaskInputErrors; values?: { title, notes, dueOn, priority, listId }; nonce? }`
 (`values` is the return type of `submittedValues`).
 
 The validation messages, produced only in `src/lib/tasks/validate.ts`:
@@ -154,12 +165,11 @@ The validation messages, produced only in `src/lib/tasks/validate.ts`:
 | `listId`   | missing, `null` or `""` is `null`; else a positive integer (`parseTaskId`) that is in `options.listIds` when `parseTaskInput(raw, { listIds })` is given them; without options any positive integer | `List does not exist.`                    |
 
 `parseTaskInput` reports every failing field at once (`TaskInputErrors` has `title`,
-`notes`, `dueOn`, `priority`, `listId`). Both forms send the title, notes, due and
-priority fields; an empty `dueOn` stores `null` and the select always sends a priority,
-`2` unless changed. `formDataToRaw` and `submittedValues` also read `listId` (`""` when
-the form has no such field, which parses to `null`).
+`notes`, `dueOn`, `priority`, `listId`). Both forms send all five fields; an empty
+`dueOn` stores `null`, the Priority select always sends a priority, `2` unless changed,
+and the List select sends `""` (`No list`, stored as `null`) or a list id.
 
-`getDb()` is imported only in the two `page.tsx` files and the two `actions.ts` files;
+`getDb()` is imported only in the `page.tsx` files, `TaskPage` and the `actions.ts` files;
 client components receive plain data (`Task[]`) or the action function as props, so no
 `"use client"` file imports `@/lib/db`.
 
@@ -169,27 +179,28 @@ client components receive plain data (`Task[]`) or the action function as props,
 `dynamic = "force-dynamic"`. `params` is a Promise in Next.js 16, so the page does
 `const { id } = await params`. The rule for the id:
 
-| `id` in the URL                         | Result                                                    |
-| --------------------------------------- | --------------------------------------------------------- |
-| a positive integer string with a task   | 200, `EditTaskForm` prefilled from `getTask(getDb(), id)` |
-| a positive integer string, no such task | `notFound()`, the Next.js 404 page with HTTP status 404   |
-| anything else (`abc`, `0`, `-1`, `1.5`) | `notFound()`, HTTP status 404                             |
+| `id` in the URL                         | Result                                                                                       |
+| --------------------------------------- | -------------------------------------------------------------------------------------------- |
+| a positive integer string with a task   | 200, `EditTaskForm` prefilled from `getTask(getDb(), id)`, `lists` from `listLists(getDb())` |
+| a positive integer string, no such task | `notFound()`, the Next.js 404 page with HTTP status 404                                      |
+| anything else (`abc`, `0`, `-1`, `1.5`) | `notFound()`, HTTP status 404                                                                |
 
 `EditTaskForm` (`"use client"`) is `useActionState(saveTask, {})` over `EditTaskFormView`:
-a hidden `id`, `<TaskFields idPrefix="edit" />` (Title, Notes, Due, Priority), a `Save`
-button and a `Cancel` link to `/`. The values come from `state.values` when the last save
-failed validation, otherwise from the `task` prop as
-`{ title, notes, dueOn: task.dueOn ?? "", priority: String(task.priority) }`, so the user's
-input survives an error and the first render shows the stored values.
+a hidden `id`, `<TaskFields idPrefix="edit" lists />` (Title, Notes, Due, Priority, List),
+a `Save` button and a `Cancel` link to `/`. The values come from `state.values` when the
+last save failed validation, otherwise from the `task` prop as
+`{ title, notes, dueOn: task.dueOn ?? "", priority: String(task.priority), listId: task.listId === null ? "" : String(task.listId) }`,
+so the user's input survives an error and the first render shows the stored values.
 
 `saveTask(prevState, formData)` in `src/app/tasks/[id]/edit/actions.ts`:
 
 1. Reads `id` from the hidden input; not a positive integer: `notFound()`.
-2. `parseTaskInput(formDataToRaw(formData))`; on `ok: false` returns `{ errors, values }`
-   and the form re-renders on the edit page with the message under the field. Nothing
-   is written.
+2. `parseTaskInput(formDataToRaw(formData), { listIds })` with `listIds` from
+   `listLists(getDb())`; on `ok: false` returns `{ errors, values }` and the form
+   re-renders on the edit page with the message under the field. Nothing is written.
 3. `updateTask(getDb(), id, value)`; `null` (the task was deleted meanwhile): `notFound()`.
-4. `revalidatePath("/")`, then `redirect("/")`. The list shows the new title and notes.
+4. `revalidatePath("/")` and `revalidatePath("/lists/[id]", "page")`, then
+   `redirect("/")`. The list shows the new title, notes and list link.
 
 `redirect` and `notFound` work by throwing, which is why `saveTask` has no `try/catch`
 around them: a `catch` would swallow the redirect and the page would stay put.
@@ -198,9 +209,9 @@ around them: a `catch` would swallow the redirect and the page would stay put.
 
 | Tier      | File                                         | Proves                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | --------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| component | `src/app/components/task-fields.test.tsx`    | the four labels, `type="date"` on Due, the three priority options with Normal selected; values prefill every control; one `role="alert"` per field error in field order; ids carry `idPrefix`                                                                                                                                                                                                                                                                                                                                           |
+| component | `src/app/components/task-fields.test.tsx`    | the five labels, `type="date"` on Due, the three priority options with Normal selected, the List options (`No list` then each list) with the default from `values.listId`; values prefill every control; one `role="alert"` per field error in field order; ids carry `idPrefix`                                                                                                                                                                                                                                                        |
 | component | `src/app/components/add-task-form.test.tsx`  | labels, placeholder and button render with Due empty and Priority `2`; error state renders one `role="alert"` per field and keeps values, Due and Priority included; a new nonce clears the form                                                                                                                                                                                                                                                                                                                                        |
-| component | `src/app/components/edit-task-form.test.tsx` | Title, Notes, Due and Priority prefilled from the task (an undated Normal task shows empty Due and Normal), Save button, Cancel link to `/`; error state renders the alert and keeps the submitted values                                                                                                                                                                                                                                                                                                                               |
+| component | `src/app/components/edit-task-form.test.tsx` | Title, Notes, Due, Priority and List prefilled from the task (an undated Normal task without a list shows empty Due, Normal and `No list`), Save button, Cancel link to `/`; error state renders the alert and keeps the submitted values                                                                                                                                                                                                                                                                                               |
 | e2e       | `e2e/tasks.spec.ts`                          | empty state on a fresh database; adding `Buy milk` shows it first under `Open (1)` and clears the form; an empty title shows `Title is required.` and adds nothing; `Mark done: Buy milk` moves it under `Done (1)` struck through with `Open (0)`; `Reopen: Buy milk` moves it back; `Delete: Buy milk` returns the empty state; the edit page changes the title to `Buy oat milk` and notes to `2 litres` and the list shows both; an empty title on the edit page shows the error and changes nothing; `/tasks/999999/edit` is a 404 |
 
 The e2e file is one serial flow (`test.describe.configure({ mode: "serial" })`) on the

@@ -4,11 +4,24 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { saveTask, type SaveTaskState } from "@/app/tasks/[id]/edit/actions";
 import type { Task } from "@/lib/tasks/types";
-import { TaskFields } from "./task-fields";
+import { type ListOption, TaskFields } from "./task-fields";
 
-export function EditTaskForm({ task }: { task: Task }) {
+export function EditTaskForm({
+  task,
+  lists,
+}: {
+  task: Task;
+  lists: ListOption[];
+}) {
   const [state, formAction] = useActionState(saveTask, {});
-  return <EditTaskFormView task={task} state={state} action={formAction} />;
+  return (
+    <EditTaskFormView
+      task={task}
+      lists={lists}
+      state={state}
+      action={formAction}
+    />
+  );
 }
 
 /**
@@ -18,10 +31,12 @@ export function EditTaskForm({ task }: { task: Task }) {
  */
 export function EditTaskFormView({
   task,
+  lists,
   state,
   action,
 }: {
   task: Task;
+  lists: ListOption[];
   state: SaveTaskState;
   action: (formData: FormData) => void;
 }) {
@@ -38,7 +53,12 @@ export function EditTaskFormView({
       className="flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white p-4"
     >
       <input type="hidden" name="id" value={task.id} />
-      <TaskFields idPrefix="edit" values={values} errors={state.errors} />
+      <TaskFields
+        idPrefix="edit"
+        values={values}
+        errors={state.errors}
+        lists={lists}
+      />
       <div className="flex items-center gap-4">
         <button
           type="submit"

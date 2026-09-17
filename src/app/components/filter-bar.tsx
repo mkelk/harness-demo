@@ -9,19 +9,29 @@ const LINKS: ReadonlyArray<[Show, string]> = [
   ["all", "All"],
 ];
 
-function href(show: Show, q: string): string {
+function href(basePath: string, show: Show, q: string): string {
   const params = new URLSearchParams({ show });
   if (q.length > 0) params.set("q", q);
-  return `/?${params.toString()}`;
+  return `${basePath}?${params.toString()}`;
 }
 
 /**
  * The Open, Done and All links and the search form above the task sections.
  * `show` is the query value as the page normalised it; `undefined` (no query)
  * is the default view, which renders like `all`, so the All link is current.
- * The links keep `q`; the form keeps `show` as a hidden input.
+ * The links keep `q`; the form keeps `show` as a hidden input. `basePath`
+ * (`/`, or `/lists/<id>` on a list page) keeps the links and the search form
+ * on the current page.
  */
-export function FilterBar({ show, q }: { show: Show | undefined; q: string }) {
+export function FilterBar({
+  show,
+  q,
+  basePath = "/",
+}: {
+  show: Show | undefined;
+  q: string;
+  basePath?: string;
+}) {
   const current: Show = show ?? "all";
   return (
     <nav
@@ -32,7 +42,7 @@ export function FilterBar({ show, q }: { show: Show | undefined; q: string }) {
         {LINKS.map(([value, label]) => (
           <li key={value}>
             <Link
-              href={href(value, q)}
+              href={href(basePath, value, q)}
               aria-current={current === value ? "page" : undefined}
               className={
                 current === value
@@ -45,7 +55,7 @@ export function FilterBar({ show, q }: { show: Show | undefined; q: string }) {
           </li>
         ))}
       </ul>
-      <form method="get" action="/" className="flex items-center gap-2">
+      <form method="get" action={basePath} className="flex items-center gap-2">
         {show ? <input type="hidden" name="show" value={show} /> : null}
         <label htmlFor="filter-q" className="font-medium">
           Search
