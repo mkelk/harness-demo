@@ -1,14 +1,15 @@
 import { expect, test, type Page } from "@playwright/test";
 
 // One ordered flow on its own rows ("Lists: ..."). It never assumes an empty
-// database, and an afterAll deletes its task and its list: spec files run
+// database, and an afterAll deletes its tasks and its list: spec files run
 // alphabetically, so this file runs before scheduling.spec.ts and
-// tasks.spec.ts, whose first test expects the fresh per-run database to be
-// empty.
+// tasks.spec.ts; only tasks.spec.ts's first test expects the fresh per-run
+// database to be empty.
 test.describe.configure({ mode: "serial" });
 
 const LIST = "Lists: Groceries";
 const TASK = "Lists: milk";
+const TASK2 = "Lists: bread";
 const listsNav = (page: Page) =>
   page.getByRole("navigation", { name: "Lists" });
 const openList = (page: Page) => page.getByRole("list", { name: "Open tasks" });
@@ -29,6 +30,11 @@ test.afterAll(async ({ browser }) => {
   if ((await deleteTask.count()) > 0) {
     await deleteTask.click();
     await expect(deleteTask).toHaveCount(0);
+  }
+  const deleteTask2 = page.getByRole("button", { name: `Delete: ${TASK2}` });
+  if ((await deleteTask2.count()) > 0) {
+    await deleteTask2.click();
+    await expect(deleteTask2).toHaveCount(0);
   }
   if ((await anySidebarLink(page).count()) > 0) {
     await anySidebarLink(page).click();
@@ -121,16 +127,33 @@ test("Lists: creating the same name again shows the duplicate message", async ({
   await expect(anySidebarLink(page)).toHaveCount(1);
 });
 
-test("Lists: deleting the list lands on / with the task kept and no sidebar entry", async ({
+test("Lists: deleting the list lands on / with the tasks kept, no list link, and no sidebar entry", async ({
   page,
 }) => {
   await page.goto("/");
   await sidebarLink(page, 0).click();
   await expect(page).toHaveURL(/\/lists\/\d+$/);
+  const listId = new URL(page.url()).pathname.split("/").pop() ?? "";
+
+  // A second task, still attached to the list when it is deleted, so the
+  // delete exercises ON DELETE SET NULL through the UI (TASK's list_id was
+  // already nulled by the earlier edit-to-No-list test).
+  await page.getByLabel("Title").fill(TASK2);
+  await page.getByRole("button", { name: "Add task" }).click();
+  await expect(page).toHaveURL(new RegExp(`/lists/${listId}$`));
+  await expect(openList(page).getByText(TASK2, { exact: true })).toBeVisible();
+
   await page.getByRole("button", { name: `Delete list: ${LIST}` }).click();
 
   await expect(page).toHaveURL(/\/$/);
   await expect(openList(page).getByText(TASK, { exact: true })).toBeVisible();
+  await expect(openList(page).getByText(TASK2, { exact: true })).toBeVisible();
+  const breadRow = openList(page)
+    .getByRole("listitem")
+    .filter({ hasText: TASK2 });
+  await expect(
+    breadRow.getByRole("link", { name: LIST, exact: true }),
+  ).toHaveCount(0);
   await expect(anySidebarLink(page)).toHaveCount(0);
   await expect(
     listsNav(page).getByRole("link", { name: "All tasks" }),

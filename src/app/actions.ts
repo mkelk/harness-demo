@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateTaskPages } from "@/app/revalidate";
 import { getDb } from "@/lib/db";
 import { listLists } from "@/lib/lists/repository";
 import { createTask, deleteTask, setDone } from "@/lib/tasks/repository";
@@ -34,12 +34,6 @@ export async function addTask(
   createTask(db, parsed.value);
   revalidateTaskPages();
   return { nonce: Date.now() };
-}
-
-/** Every page that renders task rows: `/` and each `/lists/<id>`. */
-function revalidateTaskPages(): void {
-  revalidatePath("/");
-  revalidatePath("/lists/[id]", "page");
 }
 
 /**

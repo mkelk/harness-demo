@@ -16,7 +16,7 @@ flowchart TD
     Raw --> Parse["parseTaskInput(raw)<br/>src/lib/tasks/validate.ts"]
     Parse -->|"errors"| Errors["return { errors, values }<br/>form re-renders with the input kept"]
     Parse -->|"ok"| Repo["createTask(getDb(), value)<br/>src/lib/tasks/repository.ts"]
-    Repo --> Reval["revalidatePath('/')"]
+    Repo --> Reval["revalidateTaskPages(): '/' and '/lists/[id]'"]
     Reval --> Page["page.tsx re-runs listTasks(getDb())<br/>force-dynamic"]
     Page --> List["TaskList: Open (N), Done (N)"]
     Action -->|"ok: true, nonce"| Form
@@ -59,7 +59,8 @@ flowchart TD
 renders the sidebar (`ListsNav`), the `h2` heading (`All tasks` on `/`), `<AddTaskForm lists />`,
 then `<FilterBar show={show} q={q} basePath="/" />` (the `Open`, `Done`, `All` links and
 the `Search` form), then
-`<TaskList open={open} done={done} show={show} q={q} today={today} />`.
+`<TaskList open={open} done={done} show={show} q={q} today={today} lists={listOptions} />`
+(`lists` is the `ListOption[]` for the row links; `TaskPage` passes it only on `/`, `undefined` on `/lists/<id>`).
 Which sections render per `show`, the search, the ordering, the badges and the
 `Overdue` mark are in `how/scheduling.md`; this page describes the default view (`/`
 with no query). It exports `dynamic = "force-dynamic"`, so Next.js never prerenders it
@@ -221,7 +222,7 @@ run's fresh `data/e2e-<timestamp>.db`.
 
 | Symptom                                                                         | Cause                                                                                                                  | Fix                                                                                                        |
 | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| the list does not change after an add                                           | `revalidatePath("/")` missing in the action, or the page was prerendered                                               | keep `revalidatePath("/")` after every write and `dynamic = "force-dynamic"` on the page                   |
+| the list does not change after an add                                           | `revalidateTaskPages()` (`src/app/revalidate.ts`) missing in the action, or the page was prerendered                   | keep `revalidateTaskPages()` after every write and `dynamic = "force-dynamic"` on the page                 |
 | the form keeps the old text after a successful add                              | the form is not remounted                                                                                              | keep `key={state.nonce}` on the `<form>` and return a new `nonce` from the action on success               |
 | the form loses its text after a validation error                                | `values` not returned from the action, or `defaultValue` not wired to `state.values`                                   | return the submitted strings in `values`; read them in `defaultValue`                                      |
 | `pnpm build` fails on `node:sqlite` in a client component                       | a `"use client"` component imported `@/lib/db` or the repository                                                       | call `getDb()` only in `page.tsx` and `actions.ts`; pass data as props                                     |
