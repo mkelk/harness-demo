@@ -1,6 +1,6 @@
 # Increment 02-ngm — Organise
 
-**Status:** IN PROGRESS (epic 1 DONE 2026-09-17, epic 2 next) · **Target:** 2026-09-19
+**Status:** AT CHECKPOINT (both epics DONE 2026-09-17; awaiting human review and merge) · **Target:** 2026-09-19
 **Engine:** synthesized ticks skill (user-level `~/.claude/skills/ticks/`, shared mode; not vendored)
 **Spec:** `docs/thoughts/2026-09-17-increment-02-organise.md` (source of truth for every epic)
 **Builds on:** increment 01-rxx (`../increment-01-rxx/completion.md`); its postmortem items are applied in the spec's first section.

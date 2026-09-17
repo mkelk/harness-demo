@@ -65,3 +65,9 @@
 **Problem:** A failing mid-flow serial e2e test left rows behind and broke the next spec file.
 **Cause:** Cleanup lived in the last test of the serial group, which Playwright skips after a failure.
 **Rule:** Per-file cleanup goes in `test.afterAll` with its own page; spec files never assume another file's state.
+
+## Server actions
+
+**Problem:** A list created from the sidebar did not refresh `/lists/<id>` pages until the next request.
+**Cause:** Each action revalidated only the paths its author had in mind.
+**Rule:** Every write action calls `revalidateTaskPages()` from `src/app/revalidate.ts`; a new route that shows tasks or lists is added there, not in the actions. A `"use server"` file cannot export a sync helper, so shared helpers live in a plain module.
