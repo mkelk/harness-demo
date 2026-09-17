@@ -2,7 +2,7 @@
   "id": "58o",
   "title": "Final review of Due dates and priority diff",
   "description": "Read-only frontier review of the epic diff from the increment base (tag 01-rxx.task-list / main) to HEAD against the spec's Epic 1 sections. Axes: spec compliance (ordering, messages, filter semantics, badges), correctness (migration on existing dbs, date validation, timezone of today, LIKE escaping), test quality, contract design (Priority type, ListFilter), doc accuracy, drift.",
-  "status": "open",
+  "status": "in_progress",
   "priority": 2,
   "type": "task",
   "owner": "morten@elk.dk",
@@ -13,5 +13,6 @@
   "role": "review",
   "created_by": "morten@elk.dk",
   "created_at": "2026-09-17T13:44:03.909832687Z",
-  "updated_at": "2026-09-17T13:44:03.909832687Z"
+  "updated_at": "2026-09-17T14:01:53.067471061Z",
+  "started_at": "2026-09-17T14:01:53.067468796Z"
 }
