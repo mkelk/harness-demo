@@ -1,0 +1,16 @@
+{
+  "id": "x7s",
+  "title": "Repairs from final review of Due dates and priority",
+  "description": "Repairs routed from the epic's final review (tick 58o). Apply exactly these; nothing else.\n1. src/lib/tasks/repository.ts: escape LIKE wildcards in q: replace `\\`, `%`, `_` with `\\\\`, `\\%`, `\\_` and use `LIKE '%' || lower(?) || '%' ESCAPE '\\'`. Integration test: with titles \"100% done\", \"100 done\", \"a_b\", \"axb\": q \"100%\" matches only \"100% done\"; q \"a_b\" matches only \"a_b\". In docs/current/how/scheduling.md say that matching is a case-insensitive substring, wildcards are literal, and SQLite folds ASCII case only (`mælk` does not match `MÆLK`).\n2. src/app/components/task-list.tsx (and page.tsx if needed): the empty-state paragraph \"No tasks yet. Add the first one above.\" renders only when show is undefined or \"all\" and both lists are empty and q is empty; with show=open and no open rows render the \"Open (0)\" heading. Update task-list.test.tsx (a case: show \"open\", no rows → \"Open (0)\" heading and no empty-state text) and the `open` row of the sections table in how/scheduling.md.\n3. docs/current/how/scheduling.md: fix the `q` row of the query-parameter table: the SQL fragment with `||` breaks the table; move the SQL out of the table into the sentence below it (keep the table cell as prose: \"case-insensitive substring on the title\").\n4. src/app/components/task-fields.tsx: replace the local `TaskFieldValues` / `TaskFieldErrors` type declarations with `import type` of the equivalent types from \"@/lib/tasks/validate\" (export a `SubmittedValues` type there if needed: `export type SubmittedValues = ReturnType\u003ctypeof submittedValues\u003e`), so a new field is added in one place.\n5. src/lib/db/open.integration.test.ts: in the \"0002 on a db that already had 0001\" test, insert a task after 0001 and assert after 0002 it reads back with priority 2 and due_on NULL.\n6. src/lib/tasks/repository.integration.test.ts: make the tie-break discriminating: set the fake clock backwards before one insert so a higher id has an older created_at, and assert created_at wins over id.\n7. e2e/scheduling.spec.ts: move the cleanup delete into `test.afterAll(async ({ browser }) =\u003e { const page = await browser.newPage(); ... })` so it runs even if an earlier serial test fails; keep the assertions of the last test that do not depend on the delete (or drop that test if it only deleted).\nRun: pnpm typecheck \u0026\u0026 pnpm lint \u0026\u0026 pnpm test \u0026\u0026 pnpm docs:check",
+  "notes": "2026-09-17 16:05 - runner-state: runner=claude branch=tick/9jr/x7s worktree=../.ticks-worktrees/x7s base=c516947ac1a5572b68f9d10e6b3f2a21138cf68b mode=solo-tick tier=balanced (repairs from review 58o)",
+  "status": "in_progress",
+  "priority": 2,
+  "type": "task",
+  "owner": "morten@elk.dk",
+  "parent": "9jr",
+  "acceptance_criteria": "In-worktree gates pass; LIKE escaping tested; empty-state rule tested; scheduling.md table renders (no bare || in a table row); task-fields imports its types; the two test hardenings present; afterAll cleanup in scheduling.spec.ts. Post-merge: 16 e2e still pass.",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T14:05:39.302142294Z",
+  "updated_at": "2026-09-17T14:05:40.434972953Z",
+  "started_at": "2026-09-17T14:05:40.417977689Z"
+}
