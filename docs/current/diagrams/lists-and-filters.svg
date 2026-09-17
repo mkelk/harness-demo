@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 960 740" role="img" aria-labelledby="lists-and-filters-title lists-and-filters-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="lists-and-filters-title">Lists and filters: one page body, scoped or not</title>
+  <desc id="lists-and-filters-desc">A request to / or /lists/id carries show and q. The page parses them with parseFilterQuery; on /lists/id it also parses the id and loads the list with getList, answering 404 when it is unknown. Both pages render TaskPage, the focal component, which calls listLists for the sidebar and listTasks with the list scope for the sections. The sidebar, ListsNav, shows All tasks and one link per list with its open count, plus the New list form that posts to createListAction; a duplicate name answers with a message. The body shows the heading, the add form with the List select defaulting to the current list, the filter bar and the task sections; on a list page a Delete list button posts to deleteListAction, which sets the tasks' list_id to null through on delete set null and redirects to /.</desc>
+  <defs><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+    <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+  </defs>
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+  <text x="40" y="52" fill="#2d3142" font-size="28" font-family="'Instrument Serif', serif">Lists and filters</text>
+  <text x="40" y="74" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">ONE PAGE BODY, SCOPED TO A LIST OR NOT</text>
+<path d="M 240,140 V 180" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="252" y="154" width="44.4" height="12" rx="2" fill="#f5f5f5"/>
+<text x="252" y="163" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">SHOW, Q</text>
+<path d="M 440,210 H 520" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="447.4" y="186" width="65.2" height="12" rx="2" fill="#f5f5f5"/>
+<text x="480" y="195" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">/LISTS/&lt;ID&gt;</text>
+<path d="M 160,240 V 300" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+<rect x="172" y="264" width="13.2" height="12" rx="2" fill="#f5f5f5"/>
+<text x="172" y="273" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">/</text>
+<path d="M 720,240 V 262 Q 720,270 712,270 H 328 Q 320,270 320,278 V 300" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+<rect x="505.6" y="247" width="28.8" height="12" rx="2" fill="#f5f5f5"/>
+<text x="520" y="256" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">LIST</text>
+<path d="M 350,360 V 400" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="362" y="374" width="86.0" height="12" rx="2" fill="#f5f5f5"/>
+<text x="362" y="383" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">LISTID, SHOW, Q</text>
+<path d="M 440,330 H 520" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="457.8" y="306" width="44.4" height="12" rx="2" fill="#f5f5f5"/>
+<text x="480" y="315" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">SIDEBAR</text>
+<path d="M 350,450 V 510" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M 720,350 V 400" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M 720,460 V 520" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="732" y="484" width="65.2" height="12" rx="2" fill="#f5f5f5"/>
+<text x="732" y="493" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">CREATE LIST</text>
+<path d="M 350,570 V 610" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="362" y="584" width="106.8" height="12" rx="2" fill="#f5f5f5"/>
+<text x="362" y="593" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.06em">DELETE LIST: &lt;NAME&gt;</text>
+<rect x="40" y="90" width="400" height="50" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="90" width="400" height="50" rx="6" fill="#4f5d75" fill-opacity="0.10" stroke="#7a8399" stroke-width="1"/>
+<rect x="48" y="96" width="27" height="12" rx="2" fill="none" stroke="#7a8399" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="61.5" y="105" fill="#7a8399" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">GET</text>
+<text x="240.0" y="114.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">/  or  /lists/&lt;id&gt;</text>
+<text x="240.0" y="129.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">?show=open|done|all &amp;q=word</text>
+<rect x="40" y="180" width="400" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="180" width="400" height="60" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="48" y="186" width="32" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="64.0" y="195" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">PAGE</text>
+<text x="240.0" y="209.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">page.tsx  /  lists/[id]/page.tsx</text>
+<text x="240.0" y="224.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">parseFilterQuery(await searchParams); today = UTC day</text>
+<rect x="520" y="180" width="400" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="520" y="180" width="400" height="60" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="528" y="186" width="42" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="549.0" y="195" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LOOKUP</text>
+<text x="720.0" y="209.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">parseTaskId(id), getList(db, id)</text>
+<text x="720.0" y="224.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">null → notFound() 404</text>
+<rect x="40" y="300" width="400" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="300" width="400" height="60" rx="6" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
+<rect x="48" y="306" width="32" height="12" rx="2" fill="none" stroke="#eb6c36" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="64.0" y="315" fill="#eb6c36" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">BODY</text>
+<text x="240.0" y="329.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">TaskPage({ list, show, q, today })</text>
+<text x="240.0" y="344.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">src/app/components/task-page.tsx</text>
+<rect x="520" y="300" width="400" height="50" rx="6" fill="#f5f5f5"/>
+<rect x="520" y="300" width="400" height="50" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="528" y="306" width="22" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="539.0" y="315" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DB</text>
+<text x="720.0" y="324.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">listLists(db)</text>
+<text x="720.0" y="339.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">name COLLATE NOCASE; openCount per list</text>
+<rect x="260" y="400" width="180" height="50" rx="6" fill="#f5f5f5"/>
+<rect x="260" y="400" width="180" height="50" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="268" y="406" width="22" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="279.0" y="415" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DB</text>
+<text x="350.0" y="424.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">listTasks</text>
+<text x="350.0" y="439.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">{ show ?? 'all', q, listId }</text>
+<rect x="520" y="400" width="400" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="520" y="400" width="400" height="60" rx="6" fill="#2d3142" fill-opacity="0.05" stroke="#4f5d75" stroke-width="1"/>
+<rect x="528" y="406" width="27" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="541.5" y="415" fill="#4f5d75" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">NAV</text>
+<text x="720.0" y="422.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">ListsNav: nav 'Lists'</text>
+<text x="720.0" y="437.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">All tasks · '&lt;name&gt; (&lt;openCount&gt;)' · aria-current</text>
+<text x="720.0" y="450.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">NewListForm: 'List name', 'Create list'</text>
+<rect x="220" y="510" width="260" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="220" y="510" width="260" height="60" rx="6" fill="#2d3142" fill-opacity="0.05" stroke="#4f5d75" stroke-width="1"/>
+<rect x="268" y="516" width="22" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="279.0" y="525" fill="#4f5d75" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">UI</text>
+<text x="350.0" y="532.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">sections</text>
+<text x="350.0" y="547.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">h2 list name or All tasks;</text>
+<text x="350.0" y="560.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">AddTaskForm (List select), FilterBar, TaskList</text>
+<rect x="520" y="520" width="400" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="520" y="520" width="400" height="60" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="528" y="526" width="42" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="549.0" y="535" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ACTION</text>
+<text x="720.0" y="542.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">createListAction(prev, formData)</text>
+<text x="720.0" y="557.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">parseListName → createList; UNIQUE →</text>
+<text x="720.0" y="570.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">'A list with that name already exists.'</text>
+<rect x="180" y="610" width="340" height="60" rx="6" fill="#f5f5f5"/>
+<rect x="180" y="610" width="340" height="60" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-width="1"/>
+<rect x="188" y="616" width="42" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+<text x="209.0" y="625" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ACTION</text>
+<text x="350.0" y="632.0" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">deleteListAction(formData)</text>
+<text x="350.0" y="647.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">deleteList: rows kept, list_id → NULL</text>
+<text x="350.0" y="660.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">(ON DELETE SET NULL); redirect('/')</text>
+  <line x1="30" y1="692" x2="930" y2="692" stroke="#2d3142" stroke-opacity="0.10" stroke-width="0.8"/>
+  <text x="30" y="710" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+  <line x1="110" y1="706" x2="140" y2="706" stroke="#eb6c36" stroke-width="1.2"/>
+  <text x="148" y="709" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">BOTH ROUTES LAND ON THE SAME BODY</text>
+  <line x1="360" y1="706" x2="390" y2="706" stroke="#4f5d75" stroke-width="1.2"/>
+  <text x="398" y="709" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">CALL / RENDER / POST</text>
+  <rect x="540" y="700" width="30" height="12" rx="2" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
+  <text x="578" y="709" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">FOCAL: ONE COMPONENT, TWO ROUTES</text>
+</svg>
