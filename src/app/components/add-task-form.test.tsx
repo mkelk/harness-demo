@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { AddTaskFormView } from "./add-task-form";
 
@@ -36,5 +37,19 @@ describe("AddTaskFormView", () => {
       "Notes too long.",
     ]);
     expect(screen.getByLabelText("Notes")).toHaveValue("some notes");
+  });
+
+  it("clears the Title field when a new nonce remounts the form", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <AddTaskFormView state={{}} action={vi.fn()} />,
+    );
+
+    await user.type(screen.getByLabelText("Title"), "Buy milk");
+    expect(screen.getByLabelText("Title")).toHaveValue("Buy milk");
+
+    rerender(<AddTaskFormView state={{ nonce: 1 }} action={vi.fn()} />);
+
+    expect(screen.getByLabelText("Title")).toHaveValue("");
   });
 });

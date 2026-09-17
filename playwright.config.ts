@@ -9,7 +9,10 @@ export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
   workers: 1,
-  retries: process.env.CI ? 1 : 0,
+  // The spec is one serial flow on a per-run database (data/e2e-<timestamp>.db),
+  // so a retry cannot start from a fresh database: it would repeat later steps
+  // against rows earlier steps already changed, not diagnose a flaky run.
+  retries: 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: `http://localhost:${port}`,

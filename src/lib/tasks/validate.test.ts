@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   formDataToRaw,
   NOTES_MAX,
+  parseTaskId,
   parseTaskInput,
+  submittedValues,
   TITLE_MAX,
 } from "./validate";
 
@@ -120,5 +122,41 @@ describe("formDataToRaw", () => {
     if (!result.ok) {
       expect(result.errors.title).toBe("Title is required.");
     }
+  });
+});
+
+describe("parseTaskId", () => {
+  it("accepts a positive integer string", () => {
+    expect(parseTaskId("12")).toBe(12);
+  });
+
+  it("accepts a positive safe integer number", () => {
+    expect(parseTaskId(12)).toBe(12);
+  });
+
+  it.each([["0"], ["-1"], ["1.5"], ["abc"], [""], [null]])(
+    "rejects %p",
+    (raw) => {
+      expect(parseTaskId(raw)).toBeNull();
+    },
+  );
+});
+
+describe("submittedValues", () => {
+  it("reads title and notes as submitted", () => {
+    const formData = new FormData();
+    formData.append("title", "Buy milk");
+    formData.append("notes", "2%");
+
+    expect(submittedValues(formData)).toEqual({
+      title: "Buy milk",
+      notes: "2%",
+    });
+  });
+
+  it("coerces non-string (missing) values to an empty string", () => {
+    const formData = new FormData();
+
+    expect(submittedValues(formData)).toEqual({ title: "", notes: "" });
   });
 });
