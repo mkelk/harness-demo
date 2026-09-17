@@ -21,3 +21,7 @@ same files; the post-merge e2e gate caught a selector clash with Next's route an
 the frontier review sent duplicated id parsing back into the validation module. Ten Playwright
 tests cover every user path in the spec. Tag `01-rxx.task-list`. The increment now has no
 further epics: the run stops at the project checkpoint.
+
+## 2026-09-17 — Increment 01-rxx shipped
+
+Checkpoint reviewed, `2026-09-17-increment-01` merged into `main`, project tick `m2h` closed.
