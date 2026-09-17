@@ -46,3 +46,46 @@ test("rejects an empty title with 'Title is required.' and adds nothing", async 
   const open = page.getByRole("list", { name: "Open tasks" });
   await expect(open.getByRole("listitem")).toHaveCount(1);
 });
+
+test("marks a task done and moves it under Done (1) struck through", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("checkbox", { name: "Mark done: Buy milk" }).check();
+
+  await expect(page.getByRole("heading", { name: "Open (0)" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Done (1)" })).toBeVisible();
+  const done = page.getByRole("list", { name: "Done tasks" });
+  const title = done.getByText("Buy milk", { exact: true });
+  await expect(title).toBeVisible();
+  await expect(title).toHaveCSS("text-decoration-line", "line-through");
+  await expect(
+    page.getByRole("list", { name: "Open tasks" }).getByText("Buy milk"),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("checkbox", { name: "Reopen: Buy milk" }),
+  ).toBeChecked();
+});
+
+test("reopens a done task", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("checkbox", { name: "Reopen: Buy milk" }).uncheck();
+
+  await expect(page.getByRole("heading", { name: "Open (1)" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Done \(/ })).toHaveCount(0);
+  const open = page.getByRole("list", { name: "Open tasks" });
+  await expect(open.getByText("Buy milk", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("checkbox", { name: "Mark done: Buy milk" }),
+  ).not.toBeChecked();
+});
+
+test("deletes a task and returns to the empty state", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Delete: Buy milk" }).click();
+
+  await expect(
+    page.getByText("No tasks yet. Add the first one above."),
+  ).toBeVisible();
+  await expect(page.getByText("Buy milk")).toHaveCount(0);
+});

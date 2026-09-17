@@ -20,21 +20,26 @@ flowchart TD
     Reval --> Page["page.tsx re-runs listTasks(getDb())<br/>force-dynamic"]
     Page --> List["TaskList: Open (N), Done (N)"]
     Action -->|"ok: true, nonce"| Form
+    Row["row forms in TaskList<br/>hidden id (+ done), TaskCheckbox or Delete button"] -->|"POST FormData"| Toggle["toggleTask / removeTask<br/>src/app/actions.ts"]
+    Toggle --> Write["setDone(getDb(), id, done) / deleteTask(getDb(), id)"]
+    Write --> Reval
 ```
 
 ## Key entry points
 
-| Concern                                 | Where                                                                                     |
-| --------------------------------------- | ----------------------------------------------------------------------------------------- |
-| The list page (reads on every request)  | `src/app/page.tsx` → `Home`, `dynamic`                                                    |
-| The add server action                   | `src/app/actions.ts` → `addTask`, `AddTaskState`                                          |
-| The add form (client, `useActionState`) | `src/app/components/add-task-form.tsx` → `AddTaskForm`, `AddTaskFormView`                 |
-| The open and done lists                 | `src/app/components/task-list.tsx` → `TaskList`                                           |
-| Reading and writing tasks               | `src/lib/tasks/repository.ts` → `listTasks`, `createTask`                                 |
-| Validation rules and messages           | `src/lib/tasks/validate.ts` → `parseTaskInput`, `formDataToRaw`, `TITLE_MAX`, `NOTES_MAX` |
-| The domain types                        | `src/lib/tasks/types.ts` → `Task`, `TaskInput`                                            |
-| Component test of the form              | `src/app/components/add-task-form.test.tsx`                                               |
-| End-to-end flow on a fresh database     | `e2e/tasks.spec.ts`                                                                       |
+| Concern                                      | Where                                                                                     |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| The list page (reads on every request)       | `src/app/page.tsx` → `Home`, `dynamic`                                                    |
+| The add server action                        | `src/app/actions.ts` → `addTask`, `AddTaskState`                                          |
+| The done, reopen and delete server actions   | `src/app/actions.ts` → `toggleTask`, `removeTask`                                         |
+| The checkbox that submits its form on change | `src/app/components/task-checkbox.tsx` → `TaskCheckbox`                                   |
+| The add form (client, `useActionState`)      | `src/app/components/add-task-form.tsx` → `AddTaskForm`, `AddTaskFormView`                 |
+| The open and done lists                      | `src/app/components/task-list.tsx` → `TaskList`                                           |
+| Reading and writing tasks                    | `src/lib/tasks/repository.ts` → `listTasks`, `createTask`, `setDone`, `deleteTask`        |
+| Validation rules and messages                | `src/lib/tasks/validate.ts` → `parseTaskInput`, `formDataToRaw`, `TITLE_MAX`, `NOTES_MAX` |
+| The domain types                             | `src/lib/tasks/types.ts` → `Task`, `TaskInput`                                            |
+| Component test of the form                   | `src/app/components/add-task-form.test.tsx`                                               |
+| End-to-end flow on a fresh database          | `e2e/tasks.spec.ts`                                                                       |
 
 ## The page
 
@@ -45,11 +50,11 @@ database. The page keeps a single `h1` reading `harness-demo` (the smoke test as
 
 `TaskList` renders:
 
-| State                        | Markup                                                                                                                                                                                         |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| no tasks at all              | one paragraph: `No tasks yet. Add the first one above.`                                                                                                                                        |
-| open tasks                   | `h2` `Open (N)`, then a `ul` with accessible name `Open tasks`; each `li`: the title, the first line of the notes in muted text when notes are non-empty, an `Edit` link to `/tasks/<id>/edit` |
-| done tasks (only when N > 0) | `h2` `Done (N)`, then a `ul` with accessible name `Done tasks`; each `li`: the title with Tailwind `line-through`                                                                              |
+| State                        | Markup                                                                                                                                                                                                                                                                 |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| no tasks at all              | one paragraph: `No tasks yet. Add the first one above.`                                                                                                                                                                                                                |
+| open tasks                   | `h2` `Open (N)`, then a `ul` with accessible name `Open tasks`; each `li`: an unchecked checkbox `Mark done: <title>`, the title, the first line of the notes in muted text when notes are non-empty, an `Edit` link to `/tasks/<id>/edit`, a `Delete: <title>` button |
+| done tasks (only when N > 0) | `h2` `Done (N)`, then a `ul` with accessible name `Done tasks`; each `li`: a checked checkbox `Reopen: <title>`, the title with Tailwind `line-through`, a `Delete: <title>` button                                                                                    |
 
 Ordering comes from the repository, not the page: `open` is `created_at DESC, id DESC`
 (newest first), `done` is `done_at DESC, id DESC` (most recently completed first).
@@ -74,7 +79,30 @@ again. Error text renders under its field in a `<p role="alert">`.
 `AddTaskFormView` takes `state` and `action` as props so the component test renders it
 directly with a hand-made state and never touches a server action or a database.
 
-## The server action
+## Done, reopen and delete
+
+Each row carries two small forms rendered by the server component `TaskList`; the
+arguments travel as hidden inputs, so there is no client state and no JavaScript beyond
+the checkbox:
+
+| Control                                             | Form                                                           | Action                        |
+| --------------------------------------------------- | -------------------------------------------------------------- | ----------------------------- |
+| checkbox, accessible name `Mark done: <title>`      | `action={toggleTask}`, hidden `id=<id>`, hidden `done="true"`  | `setDone(getDb(), id, true)`  |
+| checked checkbox, accessible name `Reopen: <title>` | `action={toggleTask}`, hidden `id=<id>`, hidden `done="false"` | `setDone(getDb(), id, false)` |
+| button, accessible name `Delete: <title>`           | `action={removeTask}`, hidden `id=<id>`                        | `deleteTask(getDb(), id)`     |
+
+The accessible names come from `aria-label` and are exactly `Mark done: <title>`,
+`Reopen: <title>` and `Delete: <title>`; the e2e test locates controls by them.
+
+`TaskCheckbox` (`"use client"`) is the only client code in a row: on `change` it calls
+`event.currentTarget.form?.requestSubmit()`, which submits the enclosing form and so runs
+its server action. `toggleTask(formData)` and `removeTask(formData)` return `void`: they
+read `id` (a positive integer string; anything else is ignored) and, for toggle, `done`
+(`"true"` means mark done, anything else means reopen), call the repository once and then
+`revalidatePath("/")`. An unknown `id` is a silent no-op: `setDone` returns `null` and
+`deleteTask` returns `false`, and the page re-renders from the database either way.
+
+## The add server action
 
 `addTask(prevState, formData)` in `src/app/actions.ts` (`"use server"`):
 
@@ -99,21 +127,23 @@ The validation messages, produced only in `src/lib/tasks/validate.ts`:
 
 ## Tests
 
-| Tier      | File                                        | Proves                                                                                                                                                             |
-| --------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| component | `src/app/components/add-task-form.test.tsx` | labels, placeholder and button render; error state renders one `role="alert"` per field and keeps values                                                           |
-| e2e       | `e2e/tasks.spec.ts`                         | empty state on a fresh database; adding `Buy milk` shows it first under `Open (1)` and clears the form; an empty title shows `Title is required.` and adds nothing |
+| Tier      | File                                        | Proves                                                                                                                                                                                                                                                                                                                           |
+| --------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| component | `src/app/components/add-task-form.test.tsx` | labels, placeholder and button render; error state renders one `role="alert"` per field and keeps values                                                                                                                                                                                                                         |
+| e2e       | `e2e/tasks.spec.ts`                         | empty state on a fresh database; adding `Buy milk` shows it first under `Open (1)` and clears the form; an empty title shows `Title is required.` and adds nothing; `Mark done: Buy milk` moves it under `Done (1)` struck through with `Open (0)`; `Reopen: Buy milk` moves it back; `Delete: Buy milk` returns the empty state |
 
 The e2e file is one serial flow (`test.describe.configure({ mode: "serial" })`) on the
 run's fresh `data/e2e-<timestamp>.db`.
 
 ## Failure modes
 
-| Symptom                                                   | Cause                                                                                                | Fix                                                                                                        |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| the list does not change after an add                     | `revalidatePath("/")` missing in the action, or the page was prerendered                             | keep `revalidatePath("/")` after every write and `dynamic = "force-dynamic"` on the page                   |
-| the form keeps the old text after a successful add        | the form is not remounted                                                                            | keep `key={state.nonce}` on the `<form>` and return a new `nonce` from the action on success               |
-| the form loses its text after a validation error          | `values` not returned from the action, or `defaultValue` not wired to `state.values`                 | return the submitted strings in `values`; read them in `defaultValue`                                      |
-| `pnpm build` fails on `node:sqlite` in a client component | a `"use client"` component imported `@/lib/db` or the repository                                     | call `getDb()` only in `page.tsx` and `actions.ts`; pass data as props                                     |
-| `useActionState` type error on the action                 | the action signature is not `(prevState: AddTaskState, formData: FormData) => Promise<AddTaskState>` | keep the two-argument signature; `useActionState` passes the previous state first                          |
-| e2e sees rows from an earlier run                         | `DATABASE_PATH` was set explicitly to a reused file                                                  | unset it; `playwright.config.ts` picks `data/e2e-<timestamp>.db` per run; `rm -f data/e2e-*.db*` cleans up |
+| Symptom                                                   | Cause                                                                                                                  | Fix                                                                                                        |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| the list does not change after an add                     | `revalidatePath("/")` missing in the action, or the page was prerendered                                               | keep `revalidatePath("/")` after every write and `dynamic = "force-dynamic"` on the page                   |
+| the form keeps the old text after a successful add        | the form is not remounted                                                                                              | keep `key={state.nonce}` on the `<form>` and return a new `nonce` from the action on success               |
+| the form loses its text after a validation error          | `values` not returned from the action, or `defaultValue` not wired to `state.values`                                   | return the submitted strings in `values`; read them in `defaultValue`                                      |
+| `pnpm build` fails on `node:sqlite` in a client component | a `"use client"` component imported `@/lib/db` or the repository                                                       | call `getDb()` only in `page.tsx` and `actions.ts`; pass data as props                                     |
+| `useActionState` type error on the action                 | the action signature is not `(prevState: AddTaskState, formData: FormData) => Promise<AddTaskState>`                   | keep the two-argument signature; `useActionState` passes the previous state first                          |
+| clicking a checkbox changes nothing                       | the checkbox is outside its form, or `requestSubmit()` was replaced by `submit()`, which skips React's action handling | keep `TaskCheckbox` inside the `<form action={toggleTask}>` and keep `requestSubmit()`                     |
+| a task toggles the wrong way                              | the hidden `done` value does not match the row's section                                                               | open rows submit `done="true"`, done rows submit `done="false"` (`ToggleForm` in `task-list.tsx`)          |
+| e2e sees rows from an earlier run                         | `DATABASE_PATH` was set explicitly to a reused file                                                                    | unset it; `playwright.config.ts` picks `data/e2e-<timestamp>.db` per run; `rm -f data/e2e-*.db*` cleans up |

@@ -25,11 +25,11 @@ Rendered SVGs live in `diagrams/`, one per `<!-- diagram: <id> -->` Mermaid bloc
 page under `docs/current/`. `pnpm docs:check` fails when a stamp no longer matches the
 Mermaid block; the procedure is `_documentation_principles.md` → **Diagrams first**.
 
-| Id             | Lives in              | Shows                                                                                                                                                                     |
-| -------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `architecture` | `how/architecture.md` | the browser, the App Router routes and server actions, `src/lib`, the SQLite file, and the test tiers around them                                                         |
-| `persistence`  | `how/persistence.md`  | `openDatabase`: ensure directory, PRAGMAs, `applyMigrations` against `schema_migrations`, the handle; `getDb` and `createTestDb` as callers                               |
-| `data-model`   | `data-model.md`       | ER view of `tasks` and `schema_migrations` with their columns and constraints                                                                                             |
-| `task-flow`    | `how/tasks.md`        | form submit, server action, `formDataToRaw` and `parseTaskInput`, errors back to the form or the repository write, `revalidatePath("/")`, the page re-reading `listTasks` |
+| Id             | Lives in              | Shows                                                                                                                                                                                                                          |
+| -------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `architecture` | `how/architecture.md` | the browser, the App Router routes and server actions, `src/lib`, the SQLite file, and the test tiers around them                                                                                                              |
+| `persistence`  | `how/persistence.md`  | `openDatabase`: ensure directory, PRAGMAs, `applyMigrations` against `schema_migrations`, the handle; `getDb` and `createTestDb` as callers                                                                                    |
+| `data-model`   | `data-model.md`       | ER view of `tasks` and `schema_migrations` with their columns and constraints                                                                                                                                                  |
+| `task-flow`    | `how/tasks.md`        | form submit, server action, `formDataToRaw` and `parseTaskInput`, errors back to the form or the repository write; the row forms into `toggleTask` and `removeTask`; `revalidatePath("/")` and the page re-reading `listTasks` |
 
-**Last documentation update:** 2026-09-17 (epic Task list, tick swe: how/tasks added with the task-flow diagram; e2e database path is now per run).
+**Last documentation update:** 2026-09-17 (epic Task list, tick 76z: how/tasks covers done, reopen and delete; the task-flow diagram gained the toggle and remove branch).
