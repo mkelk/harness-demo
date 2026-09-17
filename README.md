@@ -109,23 +109,29 @@ Details: [`docs/current/testing.md`](docs/current/testing.md) (commands, tiers, 
 modes) and [`docs/current/standards/testing-strategy.md`](docs/current/standards/testing-strategy.md)
 (what each tier proves, the rules, the guard tests).
 
-### Rules for automatic documentation
+### Rules for automatic documentation, and where they are enforced
 
 Set in `.tick/config.md` → `## Documentation`, specified in
-[`docs/current/_documentation_principles.md`](docs/current/_documentation_principles.md):
+[`docs/current/_documentation_principles.md`](docs/current/_documentation_principles.md).
+`docs/current/` is current truth, tiered by audience, one page per concern, listed in
+`_overview.md`; every how-it-works page opens with a diagram. As with tests, the rule is
+only as good as the point in the run that checks it:
 
-- `docs/current/` is current truth, tiered by audience, one page per concern, listed in
-  `_overview.md`.
-- A tick that changes behaviour, commands, config or tables updates `docs/current/` in
-  the same tick. The epic close-out runs a **living-docs audit** against what the epic
-  built and refreshes the inventory and its date line.
-- **Diagrams first.** A how-it-works page opens with a diagram: Mermaid in the Markdown
-  is the source, the `diagram-design` skill renders an SVG beside it, and a SHA stamp
-  proves the two match. Implementers write the Mermaid; the orchestrator renders and
-  stamps at close-out.
-- `pnpm docs:check` holds the mechanical parts (inventory, page shape, stamps) and runs
-  `--strict` at close-out, so an epic cannot close with a missing page or an unrendered
-  diagram.
+| Point in the run    | What is checked                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Where the rule lives                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| **Tick creation**   | A tick that changes behaviour, commands, config or tables names the page it updates, and a tick that creates a how-it-works page names its diagram id (`<!-- diagram: lists-and-filters -->`), so the Mermaid block is in scope, not follow-up.                                                                                                                                                                                                                                                                                                        | `.tick/config.md` → `## For implementers`, `## Documentation`                  |
+| **In the worktree** | `pnpm docs:check` runs in every tick's gate: a page not listed in `_overview.md`, a `how/` page without a tagged Mermaid block before its first heading, a missing `## Key entry points` table, an entry-point path that does not exist, or a page over 650 lines fails the tick. A missing SVG is a warning here, because rendering is orchestrator work.                                                                                                                                                                                             | `scripts/check-docs.mjs`, tested by `scripts/check-docs.test.ts`               |
+| **Close-out**       | The living-docs audit passes over `docs/current/` against the epic's diff, renders every `missing` or `stale` diagram with the `diagram-design` skill, stamps it (`pnpm docs:check --stamp` writes the SHA-256 of the Mermaid block to `diagrams/<id>.sha`), refreshes the inventory and date line, and then A3 `pnpm docs:check --strict` must pass, where a missing or stale render is a failure. This fired four times in two increments: every edit to an existing Mermaid block went stale and had to be re-rendered before the epic could close. | `.tick/config.md` → `## At epic close-out` step 4, `## Acceptance Evidence` A3 |
+| **Afterwards**      | The stamp is a hash, not a timestamp: a later Mermaid edit, a clone or a merge cannot fool it, and `pnpm check` (which includes `docs:check`) goes red.                                                                                                                                                                                                                                                                                                                                                                                                | `scripts/check-docs.mjs`                                                       |
+
+What is not enforced mechanically: whether a diagram shows a mechanism or merely decorates a
+list, and whether a concern that deserved a how-page was written as something else. Those
+are the final review's doc-accuracy axis, a judgment call at frontier tier.
+
+Rendering is the one step that is a skill invocation rather than a binary: Mermaid in the
+Markdown is the source, the skill draws an editorial SVG next to it under
+`docs/current/diagrams/`, and only the SVG is referenced from the page. Implementers write
+the Mermaid; the orchestrator renders and stamps.
 
 ### Learning, inside and between increments
 
