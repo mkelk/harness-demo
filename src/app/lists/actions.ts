@@ -1,7 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { revalidateTaskPages } from "@/app/revalidate";
 import { getDb } from "@/lib/db";
 import {
   createList,
@@ -42,7 +42,7 @@ export async function createListAction(
     }
     throw error;
   }
-  revalidatePath("/");
+  revalidateTaskPages();
   return { nonce: Date.now() };
 }
 
@@ -56,6 +56,6 @@ export async function deleteListAction(formData: FormData): Promise<void> {
   if (id !== null) {
     deleteList(getDb(), id);
   }
-  revalidatePath("/");
+  revalidateTaskPages();
   redirect("/");
 }

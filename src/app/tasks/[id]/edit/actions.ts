@@ -1,7 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
+import { revalidateTaskPages } from "@/app/revalidate";
 import { getDb } from "@/lib/db";
 import { listLists } from "@/lib/lists/repository";
 import { updateTask } from "@/lib/tasks/repository";
@@ -41,7 +41,6 @@ export async function saveTask(
   const updated = updateTask(db, id, parsed.value);
   if (updated === null) notFound();
 
-  revalidatePath("/");
-  revalidatePath("/lists/[id]", "page");
+  revalidateTaskPages();
   redirect("/");
 }
