@@ -11,8 +11,8 @@ const task: Task = {
   id: 7,
   title: "Buy milk",
   notes: "Semi-skimmed",
-  dueOn: null,
-  priority: 2,
+  dueOn: "2026-09-30",
+  priority: 1,
   doneAt: null,
   createdAt: "2026-09-17T10:00:00.000Z",
   updatedAt: "2026-09-17T10:00:00.000Z",
@@ -23,6 +23,8 @@ describe("EditTaskFormView", () => {
     render(<EditTaskFormView task={task} state={{}} action={vi.fn()} />);
     expect(screen.getByLabelText("Title")).toHaveValue("Buy milk");
     expect(screen.getByLabelText("Notes")).toHaveValue("Semi-skimmed");
+    expect(screen.getByLabelText("Due")).toHaveValue("2026-09-30");
+    expect(screen.getByLabelText("Priority")).toHaveValue("1");
     expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cancel" })).toHaveAttribute(
       "href",
@@ -37,7 +39,12 @@ describe("EditTaskFormView", () => {
         task={task}
         state={{
           errors: { title: "Title is required." },
-          values: { title: "", notes: "changed notes" },
+          values: {
+            title: "",
+            notes: "changed notes",
+            dueOn: "",
+            priority: "3",
+          },
         }}
         action={vi.fn()}
       />,
@@ -45,5 +52,19 @@ describe("EditTaskFormView", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Title is required.");
     expect(screen.getByLabelText("Title")).toHaveValue("");
     expect(screen.getByLabelText("Notes")).toHaveValue("changed notes");
+    expect(screen.getByLabelText("Due")).toHaveValue("");
+    expect(screen.getByLabelText("Priority")).toHaveValue("3");
+  });
+
+  it("shows an undated Normal task with an empty Due and Normal selected", () => {
+    render(
+      <EditTaskFormView
+        task={{ ...task, dueOn: null, priority: 2 }}
+        state={{}}
+        action={vi.fn()}
+      />,
+    );
+    expect(screen.getByLabelText("Due")).toHaveValue("");
+    expect(screen.getByLabelText("Priority")).toHaveValue("2");
   });
 });

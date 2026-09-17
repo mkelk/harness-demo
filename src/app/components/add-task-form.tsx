@@ -2,11 +2,14 @@
 
 import { useActionState } from "react";
 import { addTask, type AddTaskState } from "@/app/actions";
+import { TaskFields } from "./task-fields";
 
 export function AddTaskForm() {
   const [state, formAction] = useActionState(addTask, {});
   return <AddTaskFormView state={state} action={formAction} />;
 }
+
+const EMPTY_VALUES = { title: "", notes: "", dueOn: "", priority: "2" };
 
 /**
  * The form itself, with the action state as a prop so it can be rendered and
@@ -26,41 +29,11 @@ export function AddTaskFormView({
       action={action}
       className="flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white p-4"
     >
-      <div className="flex flex-col gap-1">
-        <label htmlFor="add-title" className="text-sm font-medium">
-          Title
-        </label>
-        <input
-          id="add-title"
-          name="title"
-          type="text"
-          placeholder="What needs doing?"
-          defaultValue={state.values?.title ?? ""}
-          className="rounded border border-zinc-300 px-2 py-1"
-        />
-        {state.errors?.title ? (
-          <p role="alert" className="text-sm text-red-700">
-            {state.errors.title}
-          </p>
-        ) : null}
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="add-notes" className="text-sm font-medium">
-          Notes
-        </label>
-        <textarea
-          id="add-notes"
-          name="notes"
-          rows={2}
-          defaultValue={state.values?.notes ?? ""}
-          className="rounded border border-zinc-300 px-2 py-1"
-        />
-        {state.errors?.notes ? (
-          <p role="alert" className="text-sm text-red-700">
-            {state.errors.notes}
-          </p>
-        ) : null}
-      </div>
+      <TaskFields
+        idPrefix="add"
+        values={state.values ?? EMPTY_VALUES}
+        errors={state.errors}
+      />
       <div>
         <button
           type="submit"
