@@ -1,0 +1,15 @@
+{
+  "id": "azj",
+  "title": "Persistence foundation",
+  "description": "SQLite persistence through node:sqlite: openDatabase with WAL and migrations, applyMigrations with a schema_migrations table, migration 0001 (tasks table), getDb singleton, createTestDb temp-file helper, the tasks domain (types, parseTaskInput validation, repository: listTasks/getTask/createTask/updateTask/setDone/deleteTask), a guard test for process.env and node:sqlite import boundaries, and the pages docs/current/how/persistence.md (diagram: persistence) and docs/current/data-model.md (diagram: data-model). Expected shape: wave 1 solo foundation tick (open/migrate/test-db/migration/guard/docs, also discovers the worktree provisioning recipe), wave 2 repository (integration tests) in parallel with validation (unit tests). Source of truth: docs/thoughts/2026-09-17-increment-01-task-basics.md sections 'Under the hood', 'Table tasks', 'Domain', 'Guards added', 'Documentation added' and 'Definitions of done → Epic 1'.",
+  "status": "open",
+  "priority": 2,
+  "type": "epic",
+  "owner": "morten@elk.dk",
+  "parent": "m2h",
+  "acceptance_criteria": "A1 pnpm check green; A4 pnpm test:coverage meets the floor. Integration tests src/lib/db/open.integration.test.ts (fresh temp path creates file and parent dir; schema_migrations holds version 1 and tasks has the six columns; reopening applies nothing; createTestDb().close() removes the file) and src/lib/tasks/repository.integration.test.ts (empty listTasks; createTask first in open with doneAt null; open newest first; setDone true moves to done ordered by doneAt desc; setDone false moves back; updateTask changes fields and bumps updatedAt; getTask/updateTask null for unknown id; deleteTask true then false; 201-char title rejected by constraint) pass. Unit tests src/lib/tasks/validate.test.ts cover the spec's validation table. scripts/check-rules.test.ts passes. docs/current/how/persistence.md and docs/current/data-model.md exist, are listed in _overview.md and README.md; A3 pnpm docs:check --strict green after close-out render.",
+  "base_branch": "2026-09-17-increment-01",
+  "created_by": "morten@elk.dk",
+  "created_at": "2026-09-17T12:54:37.854320629Z",
+  "updated_at": "2026-09-17T12:54:37.884743079Z"
+}
