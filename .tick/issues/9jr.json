@@ -2,7 +2,7 @@
   "id": "9jr",
   "title": "Due dates and priority",
   "description": "Migration 0002 (due_on, priority, index), Task/TaskInput fields, parseDueOn/parsePriority/PRIORITY_LABELS and parseTaskInput handling them, listTasks ordering (due asc nulls last, priority, newest) plus show/q filters and isOverdue, shared TaskFields component used by both forms, badges/due/overdue in the list, filter bar (Open/Done/All + search), e2e/scheduling.spec.ts, docs how/scheduling.md (diagram: scheduling) and data-model.md updated. Expected shape: wave 1 domain tick (migration, types, validate, repository, tests, data-model.md), wave 2 warm-chain (TaskFields + forms → list rendering + filter bar + e2e + docs). Source of truth: docs/thoughts/2026-09-17-increment-02-organise.md → 'Task fields', 'The list page' (badges, filter bar, ordering), 'Migration 0002', 'Domain', 'App', 'Documentation added', 'Definitions of done → Epic 1'.",
-  "status": "open",
+  "status": "closed",
   "priority": 2,
   "type": "epic",
   "owner": "morten@elk.dk",
@@ -11,5 +11,7 @@
   "base_branch": "2026-09-17-increment-02",
   "created_by": "morten@elk.dk",
   "created_at": "2026-09-17T13:42:29.765091925Z",
-  "updated_at": "2026-09-17T13:42:29.792550159Z"
+  "updated_at": "2026-09-17T14:14:04.805531348Z",
+  "closed_at": "2026-09-17T14:14:04.805531348Z",
+  "closed_reason": "Completed: due dates, priority, ordering, filter bar, scheduling docs; 113 vitest, 15 e2e; retro in ia-cycles/due-dates-and-priority.md"
 }
